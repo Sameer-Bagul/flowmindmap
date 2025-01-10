@@ -6,7 +6,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings2 } from "lucide-react";
+import { Trash2, Settings2, Image, Link, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
@@ -21,6 +21,8 @@ export interface TextNodeData {
   type: NoteType;
   backgroundColor?: string;
   borderColor?: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video' | 'link';
 }
 
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
@@ -38,7 +40,6 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
       },
     },
     onUpdate: ({ editor }) => {
-      // Update the node data when content changes
       setNodes(nodes => 
         nodes.map(node => {
           if (node.id === id) {
@@ -106,14 +107,72 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
+  const handleMediaInput = (type: 'image' | 'video' | 'link') => {
+    const url = prompt(`Enter ${type} URL:`);
+    if (url) {
+      setNodes(nodes => 
+        nodes.map(node => {
+          if (node.id === id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                mediaUrl: url,
+                mediaType: type
+              }
+            };
+          }
+          return node;
+        })
+      );
+      toast.success(`${type} added successfully`);
+    }
+  };
+
+  const renderMedia = () => {
+    if (!data.mediaUrl) return null;
+    
+    switch (data.mediaType) {
+      case 'image':
+        return (
+          <img 
+            src={data.mediaUrl} 
+            alt="Node media" 
+            className="max-w-full h-auto rounded-lg mb-2"
+          />
+        );
+      case 'video':
+        return (
+          <video 
+            src={data.mediaUrl} 
+            controls 
+            className="max-w-full h-auto rounded-lg mb-2"
+          />
+        );
+      case 'link':
+        return (
+          <a 
+            href={data.mediaUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline mb-2 block"
+          >
+            {data.mediaUrl}
+          </a>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card 
       className={cn(
         "min-w-[350px] min-h-[250px] p-6 backdrop-blur-sm border-2 transition-colors duration-200",
-        "dark:bg-background/80 bg-background/95"
+        "dark:bg-background/40 bg-background/60"
       )}
       style={{
-        backgroundColor: data.backgroundColor ? `${data.backgroundColor}40` : 'transparent',
+        backgroundColor: data.backgroundColor ? `${data.backgroundColor}20` : 'transparent',
         borderColor: data.borderColor || 'hsl(var(--border))',
         backdropFilter: 'blur(8px)',
       }}
@@ -184,32 +243,63 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             {label || 'Double click to edit'}
           </div>
         )}
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleMediaInput('image')}
+          >
+            <Image className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleMediaInput('video')}
+          >
+            <Video className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleMediaInput('link')}
+          >
+            <Link className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {renderMedia()}
+        
         <div 
           className="flex-1 rounded-lg text-sm text-foreground border cursor-text hover:border-ring dark:bg-background/50 bg-background/50"
         >
           <EditorContent editor={editor} />
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        isConnectable={isConnectable}
-        className="w-4 h-4 !bg-primary/50 hover:!bg-primary transition-colors"
-      />
-      <Handle
-        type="source"
-        position={Position.Left}
-        id="left"
-        isConnectable={isConnectable}
-        className="w-4 h-4 !bg-primary/50 hover:!bg-primary transition-colors"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="right"
-        isConnectable={isConnectable}
-        className="w-4 h-4 !bg-primary/50 hover:!bg-primary transition-colors"
-      />
+      {Array.from({ length: 8 }).map((_, index) => {
+        const position = index < 2 ? Position.Left :
+                        index < 4 ? Position.Right :
+                        index < 6 ? Position.Top :
+                        Position.Bottom;
+        const style = {
+          top: index < 6 ? `${(index % 2) * 50 + 25}%` : undefined,
+          left: index >= 6 ? `${(index % 2) * 50 + 25}%` : undefined
+        };
+        
+        return (
+          <Handle
+            key={`handle-${index}`}
+            type="source"
+            position={position}
+            id={`handle-${index}`}
+            style={style}
+            isConnectable={isConnectable}
+            className="w-3 h-3 !bg-primary/50 hover:!bg-primary transition-colors"
+          />
+        );
+      })}
     </Card>
   );
 };
