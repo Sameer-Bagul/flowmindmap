@@ -6,9 +6,12 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ColorPicker } from './ColorPicker';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from '@/components/ui/label';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
@@ -16,45 +19,21 @@ export interface TextNodeData {
   label: string;
   content?: string;
   type: NoteType;
+  backgroundColor?: string;
+  borderColor?: string;
 }
-
-const getNodeStyle = (type: NoteType) => {
-  switch (type) {
-    case 'chapter':
-      return 'border-primary/50 bg-background hover:border-primary dark:border-primary/30 dark:bg-background/80';
-    case 'main-topic':
-      return 'border-blue-500/50 bg-background hover:border-blue-500 dark:border-blue-500/30 dark:bg-background/80';
-    case 'sub-topic':
-      return 'border-green-500/50 bg-background hover:border-green-500 dark:border-green-500/30 dark:bg-background/80';
-    default:
-      return '';
-  }
-};
-
-const getNodeBadgeStyle = (type: NoteType) => {
-  switch (type) {
-    case 'chapter':
-      return 'bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20';
-    case 'main-topic':
-      return 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 dark:text-blue-400 dark:bg-blue-500/20';
-    case 'sub-topic':
-      return 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-400 dark:bg-green-500/20';
-    default:
-      return '';
-  }
-};
 
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
-  const { deleteElements } = useReactFlow();
+  const { deleteElements, setNodes } = useReactFlow();
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: data.content || '<p>Click to add content...</p>',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[100px]',
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] p-2',
       },
     },
   });
@@ -86,11 +65,29 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     toast.success('Node deleted');
   }, [deleteElements, id]);
 
+  const updateNodeColor = useCallback((key: 'backgroundColor' | 'borderColor', color: string) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          const newData = { ...node.data, [key]: color };
+          return { ...node, data: newData };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
   return (
-    <Card className={cn(
-      "min-w-[350px] min-h-[250px] p-6 bg-background/95 backdrop-blur-sm border-2 transition-colors duration-200",
-      getNodeStyle(data.type)
-    )}>
+    <Card 
+      className={cn(
+        "min-w-[350px] min-h-[250px] p-6 backdrop-blur-sm border-2 transition-colors duration-200",
+        "dark:bg-background/80 bg-background/95"
+      )}
+      style={{
+        backgroundColor: data.backgroundColor || 'transparent',
+        borderColor: data.borderColor || 'hsl(var(--border))'
+      }}
+    >
       <Handle
         type="target"
         position={Position.Top}
@@ -99,17 +96,44 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
       />
       <div className="h-full flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <Badge variant="secondary" className={cn("capitalize", getNodeBadgeStyle(data.type))}>
+          <Badge variant="secondary" className="capitalize">
             {data.type.replace('-', ' ')}
           </Badge>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive/90"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <Label>Background Color</Label>
+                    <ColorPicker
+                      value={data.backgroundColor || '#ffffff'}
+                      onChange={(color) => updateNodeColor('backgroundColor', color)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Border Color</Label>
+                    <ColorPicker
+                      value={data.borderColor || '#e2e8f0'}
+                      onChange={(color) => updateNodeColor('borderColor', color)}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive/90"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         {isEditing ? (
           <Input
@@ -131,7 +155,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
           </div>
         )}
         <div 
-          className="flex-1 bg-background rounded-lg p-4 text-sm text-foreground border cursor-text overflow-y-auto hover:border-ring"
+          className="flex-1 rounded-lg text-sm text-foreground border cursor-text hover:border-ring dark:bg-background/50 bg-background/50"
           onClick={() => editor?.chain().focus().run()}
         >
           <EditorContent editor={editor} />

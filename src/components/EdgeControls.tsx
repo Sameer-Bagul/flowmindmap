@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReactFlow, MarkerType } from "@xyflow/react";
 import { toast } from "sonner";
+import { ColorPicker } from './ColorPicker';
 
 export const EdgeControls = () => {
   const { setEdges, getEdges } = useReactFlow();
@@ -40,6 +41,16 @@ export const EdgeControls = () => {
     toast.success(`Edge arrows ${hasArrows ? 'enabled' : 'disabled'}`);
   };
 
+  const updateEdgeColor = (color: string) => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        style: { ...edge.style, stroke: color },
+      }))
+    );
+    toast.success('Edge color updated');
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4 bg-background/60 backdrop-blur-sm rounded-lg border shadow-sm">
       <div className="space-y-2">
@@ -54,6 +65,14 @@ export const EdgeControls = () => {
             <SelectItem value="step">Step</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Edge Color</Label>
+        <ColorPicker
+          value={getEdges()[0]?.style?.stroke || '#000000'}
+          onChange={updateEdgeColor}
+        />
       </div>
 
       <div className="flex items-center justify-between">
