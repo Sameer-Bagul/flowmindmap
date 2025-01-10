@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useReactFlow, MarkerType, Panel } from "@xyflow/react";
+import { useReactFlow, MarkerType, Panel, Edge } from "@xyflow/react";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { toPng } from 'html-to-image';
@@ -12,7 +12,7 @@ export const EdgeControls = () => {
   const { setEdges, getEdges, getNodes, screenToFlowPosition } = useReactFlow();
 
   const updateEdgeStyle = (style: string) => {
-    setEdges((eds) =>
+    setEdges((eds: Edge[]) =>
       eds.map((edge) => ({
         ...edge,
         type: style,
@@ -22,7 +22,7 @@ export const EdgeControls = () => {
   };
 
   const toggleEdgeAnimation = () => {
-    setEdges((eds) =>
+    setEdges((eds: Edge[]) =>
       eds.map((edge) => ({
         ...edge,
         animated: !edge.animated,
@@ -33,7 +33,7 @@ export const EdgeControls = () => {
   };
 
   const toggleEdgeArrows = () => {
-    setEdges((eds) =>
+    setEdges((eds: Edge[]) =>
       eds.map((edge) => ({
         ...edge,
         markerEnd: edge.markerEnd ? undefined : { 
@@ -49,7 +49,7 @@ export const EdgeControls = () => {
   };
 
   const updateEdgeColor = (color: string) => {
-    setEdges((eds) =>
+    setEdges((eds: Edge[]) =>
       eds.map((edge) => ({
         ...edge,
         style: { 
@@ -67,7 +67,7 @@ export const EdgeControls = () => {
   };
 
   const updateEdgeWidth = (width: number) => {
-    setEdges((eds) =>
+    setEdges((eds: Edge[]) =>
       eds.map((edge) => ({
         ...edge,
         style: { ...edge.style, strokeWidth: width }
