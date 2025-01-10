@@ -31,10 +31,28 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
   const editor = useEditor({
     extensions: [StarterKit],
     content: data.content || '<p>Click to add content...</p>',
+    editable: true,
     editorProps: {
       attributes: {
         class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] p-2',
       },
+    },
+    onUpdate: ({ editor }) => {
+      // Update the node data when content changes
+      setNodes(nodes => 
+        nodes.map(node => {
+          if (node.id === id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                content: editor.getHTML()
+              }
+            };
+          }
+          return node;
+        })
+      );
     },
   });
 
@@ -44,20 +62,31 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
 
   const handleBlur = useCallback(() => {
     setIsEditing(false);
-    data.label = label;
-    if (editor) {
-      data.content = editor.getHTML();
-    }
-  }, [data, editor, label]);
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, label, setNodes]);
 
   const handleKeyDown = useCallback(
     (evt: React.KeyboardEvent) => {
       if (evt.key === 'Enter') {
+        evt.preventDefault();
         setIsEditing(false);
-        data.label = label;
+        handleBlur();
       }
     },
-    [data, label]
+    [handleBlur]
   );
 
   const handleDelete = useCallback(() => {
@@ -84,8 +113,9 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         "dark:bg-background/80 bg-background/95"
       )}
       style={{
-        backgroundColor: data.backgroundColor || 'transparent',
-        borderColor: data.borderColor || 'hsl(var(--border))'
+        backgroundColor: data.backgroundColor ? `${data.backgroundColor}40` : 'transparent',
+        borderColor: data.borderColor || 'hsl(var(--border))',
+        backdropFilter: 'blur(8px)',
       }}
     >
       <Handle
@@ -156,7 +186,6 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         )}
         <div 
           className="flex-1 rounded-lg text-sm text-foreground border cursor-text hover:border-ring dark:bg-background/50 bg-background/50"
-          onClick={() => editor?.chain().focus().run()}
         >
           <EditorContent editor={editor} />
         </div>
