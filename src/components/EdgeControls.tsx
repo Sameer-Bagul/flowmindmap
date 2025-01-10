@@ -13,7 +13,7 @@ export const EdgeControls = () => {
 
   const updateEdgeStyle = (style: string) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge) => ({
+      eds.map((edge: Edge) => ({
         ...edge,
         type: style,
       }))
@@ -23,7 +23,7 @@ export const EdgeControls = () => {
 
   const toggleEdgeAnimation = () => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge) => ({
+      eds.map((edge: Edge) => ({
         ...edge,
         animated: !edge.animated,
       }))
@@ -34,7 +34,7 @@ export const EdgeControls = () => {
 
   const toggleEdgeArrows = () => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge) => ({
+      eds.map((edge: Edge) => ({
         ...edge,
         markerEnd: edge.markerEnd ? undefined : { 
           type: MarkerType.ArrowClosed,
@@ -50,7 +50,7 @@ export const EdgeControls = () => {
 
   const updateEdgeColor = (color: string) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge) => ({
+      eds.map((edge: Edge) => ({
         ...edge,
         style: { 
           ...edge.style, 
@@ -68,7 +68,7 @@ export const EdgeControls = () => {
 
   const updateEdgeWidth = (width: number) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge) => ({
+      eds.map((edge: Edge) => ({
         ...edge,
         style: { ...edge.style, strokeWidth: width }
       }))
@@ -83,7 +83,7 @@ export const EdgeControls = () => {
       return;
     }
 
-    const scale = 2; // Higher scale for better quality
+    const scale = 2;
     const width = element.offsetWidth * scale;
     const height = element.offsetHeight * scale;
 
