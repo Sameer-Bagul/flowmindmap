@@ -3,13 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useReactFlow, MarkerType, getRectOfNodes, getTransformForBounds } from "@xyflow/react";
+import { useReactFlow, MarkerType, Panel } from "@xyflow/react";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { toPng } from 'html-to-image';
 
 export const EdgeControls = () => {
-  const { setEdges, getEdges, getNodes } = useReactFlow();
+  const { setEdges, getEdges, getNodes, screenToFlowPosition } = useReactFlow();
 
   const updateEdgeStyle = (style: string) => {
     setEdges((eds) =>
@@ -77,18 +77,23 @@ export const EdgeControls = () => {
   };
 
   const downloadImage = () => {
-    const nodesBounds = getRectOfNodes(getNodes());
-    const transform = getTransformForBounds(nodesBounds, nodesBounds.width, nodesBounds.height, 0.5);
-    
     const element = document.querySelector('.react-flow__viewport') as HTMLElement;
-    if (!element) return;
+    if (!element) {
+      toast.error('Could not find flow element');
+      return;
+    }
+
+    const scale = 2; // Higher scale for better quality
+    const width = element.offsetWidth * scale;
+    const height = element.offsetHeight * scale;
 
     toPng(element, {
       backgroundColor: '#ffffff',
-      width: nodesBounds.width,
-      height: nodesBounds.height,
+      width,
+      height,
       style: {
-        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
       },
     })
       .then((dataUrl) => {
