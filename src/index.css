@@ -59,7 +59,7 @@
 }
 
 .react-flow__node {
-  @apply shadow-lg transition-colors duration-200;
+  @apply shadow-lg;
 }
 
 .react-flow__handle {
