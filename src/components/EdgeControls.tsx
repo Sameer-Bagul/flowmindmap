@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useReactFlow } from "@xyflow/react";
+import { useReactFlow, MarkerType } from "@xyflow/react";
 import { toast } from "sonner";
 
 export const EdgeControls = () => {
@@ -33,7 +33,7 @@ export const EdgeControls = () => {
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        markerEnd: edge.markerEnd ? undefined : { type: 'arrow' },
+        markerEnd: edge.markerEnd ? undefined : { type: MarkerType.Arrow },
       }))
     );
     const hasArrows = !getEdges()[0]?.markerEnd;
