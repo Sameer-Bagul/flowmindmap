@@ -21,11 +21,11 @@ export interface TextNodeData {
 const getNodeStyle = (type: NoteType) => {
   switch (type) {
     case 'chapter':
-      return 'border-primary/50 bg-primary/5 hover:border-primary';
+      return 'border-primary/50 bg-background hover:border-primary dark:border-primary/30 dark:bg-background/80';
     case 'main-topic':
-      return 'border-blue-500/50 bg-blue-50/50 hover:border-blue-500';
+      return 'border-blue-500/50 bg-background hover:border-blue-500 dark:border-blue-500/30 dark:bg-background/80';
     case 'sub-topic':
-      return 'border-green-500/50 bg-green-50/50 hover:border-green-500';
+      return 'border-green-500/50 bg-background hover:border-green-500 dark:border-green-500/30 dark:bg-background/80';
     default:
       return '';
   }
@@ -34,11 +34,11 @@ const getNodeStyle = (type: NoteType) => {
 const getNodeBadgeStyle = (type: NoteType) => {
   switch (type) {
     case 'chapter':
-      return 'bg-primary/10 text-primary hover:bg-primary/20';
+      return 'bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20';
     case 'main-topic':
-      return 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20';
+      return 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 dark:text-blue-400 dark:bg-blue-500/20';
     case 'sub-topic':
-      return 'bg-green-500/10 text-green-700 hover:bg-green-500/20';
+      return 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-400 dark:bg-green-500/20';
     default:
       return '';
   }
