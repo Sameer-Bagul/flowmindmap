@@ -10,7 +10,6 @@ import {
   Node,
   Edge,
   Connection,
-  Panel,
   ConnectionMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -29,44 +28,29 @@ const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
 const defaultEdgeOptions = {
-  animated: false,
+  animated: true,
   style: {
     strokeWidth: 2,
     stroke: 'hsl(var(--primary))',
   },
 };
 
-const nodeDefaults = {
-  chapter: {
-    backgroundColor: '#fef3c7',
-    borderColor: '#f59e0b',
-  },
-  'main-topic': {
-    backgroundColor: '#dbeafe',
-    borderColor: '#3b82f6',
-  },
-  'sub-topic': {
-    backgroundColor: '#dcfce7',
-    borderColor: '#22c55e',
-  },
-};
-
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setElements, undo, redo } = useFlowStore();
+  const { setElements } = useFlowStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
+      const newEdge = {
+        ...params,
+        animated: true,
+        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
+      };
       setEdges((eds) => {
-        const newEdges = addEdge({
-          ...params,
-          type: 'smoothstep',
-          animated: true,
-          style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
-        }, eds);
-        setElements(nodes, newEdges);
-        return newEdges;
+        const updatedEdges = addEdge(newEdge, eds);
+        setElements(nodes, updatedEdges);
+        return updatedEdges;
       });
       toast.success('Nodes connected successfully');
     },
@@ -158,16 +142,6 @@ const Index = () => {
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
-        onEdgeClick={(_, edge) => {
-          setEdges((eds) => {
-            const newEdges = eds.filter((e) => e.id !== edge.id);
-            setElements(nodes, newEdges);
-            return newEdges;
-          });
-          toast.success('Edge deleted');
-        }}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
         fitView
         className="bg-muted/10 transition-colors duration-200"
         minZoom={0.2}
@@ -210,8 +184,7 @@ const Index = () => {
         <MiniMap 
           className="bg-background/60 border shadow-sm !bottom-5 !right-5"
           nodeColor={(node) => {
-            const type = (node.data?.type || 'default') as NoteType;
-            return nodeDefaults[type]?.backgroundColor || '#fff';
+            return node.data?.backgroundColor || '#fff';
           }}
           maskColor="rgba(0, 0, 0, 0.1)"
         />

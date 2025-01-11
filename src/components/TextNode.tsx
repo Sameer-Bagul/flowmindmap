@@ -219,13 +219,14 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     <Card 
       ref={nodeRef}
       className={cn(
-        "min-w-[350px] min-h-[250px] p-6 backdrop-blur-sm border-2 transition-colors duration-200",
-        "dark:bg-background/40 bg-background/60"
+        "min-w-[350px] min-h-[250px] p-6",
+        "bg-white/80 dark:bg-white/80", // Keep light appearance in dark mode
+        "backdrop-blur-lg border-2",
+        "shadow-xl hover:shadow-2xl transition-shadow duration-200"
       )}
       style={{
         backgroundColor: data.backgroundColor || defaultColors.bg,
         borderColor: data.borderColor || defaultColors.border,
-        backdropFilter: 'blur(8px)',
       }}
     >
       <div className="h-full flex flex-col gap-4">
@@ -322,57 +323,18 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         </div>
       </div>
       <div className="absolute inset-0 pointer-events-none">
-        {['left', 'right', 'top', 'bottom'].map((side) => (
-          <div
-            key={side}
-            className={cn(
-              "absolute w-full h-full",
-              side === 'left' && "left-0",
-              side === 'right' && "right-0",
-              side === 'top' && "top-0",
-              side === 'bottom' && "bottom-0"
-            )}
-            onMouseEnter={(e) => {
-              const rect = nodeRef.current?.getBoundingClientRect();
-              if (!rect) return;
-              
-              const position = side as Position;
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              
-              setNodes(nodes => 
-                nodes.map(node => {
-                  if (node.id === id) {
-                    const handleId = `${side}-${Date.now()}`;
-                    const handles = node.data.handles || [];
-                    return {
-                      ...node,
-                      data: {
-                        ...node.data,
-                        handles: [...handles, { id: handleId, position, x, y }]
-                      }
-                    };
-                  }
-                  return node;
-                })
-              );
-            }}
-          />
-        ))}
-        {(data.handles || []).map((handle: HandleData) => (
+        {['top', 'right', 'bottom', 'left'].map((position) => (
           <Handle
-            key={handle.id}
+            key={position}
             type="source"
-            position={handle.position}
-            id={handle.id}
-            style={{
-              left: handle.x,
-              top: handle.y,
-              transform: 'translate(-50%, -50%)',
-              opacity: 0.001
-            }}
+            position={position as Position}
+            className={cn(
+              "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+              "!bg-primary/50 hover:!bg-primary",
+              "w-3 h-3 rounded-full border-2 border-white"
+            )}
+            id={`${position}-${id}`}
             isConnectable={isConnectable}
-            className="w-2 h-2 !bg-primary/50 hover:!bg-primary transition-colors"
           />
         ))}
       </div>
