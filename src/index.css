@@ -128,5 +128,13 @@ body.dragging .react-flow__handle {
 }
 
 .dark .prose {
-  @apply prose-invert;
+  @apply text-foreground;
+}
+
+.node-label {
+  @apply text-foreground font-medium;
+}
+
+.dark .node-label {
+  @apply text-gray-100;
 }

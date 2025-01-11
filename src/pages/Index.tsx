@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -12,8 +12,6 @@ import {
   Connection,
   Panel,
   ConnectionMode,
-  OnNodeDragStart,
-  OnNodeDragStop,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from "@/components/ui/button";
@@ -24,6 +22,8 @@ import { toast } from "sonner";
 import { EdgeControls } from '@/components/EdgeControls';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
+import { useFlowStore } from '@/store/flowStore';
+import { Link } from 'react-router-dom';
 
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
@@ -54,18 +54,23 @@ const nodeDefaults = {
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { setElements, undo, redo } = useFlowStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setEdges((eds) => addEdge({
-        ...params,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
-      }, eds));
+      setEdges((eds) => {
+        const newEdges = addEdge({
+          ...params,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
+        }, eds);
+        setElements(nodes, newEdges);
+        return newEdges;
+      });
       toast.success('Nodes connected successfully');
     },
-    [setEdges],
+    [setEdges, nodes, setElements],
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -97,19 +102,50 @@ const Index = () => {
         },
       };
 
-      setNodes((nds) => [...nds, newNode]);
+      setNodes((nds) => {
+        const newNodes = [...nds, newNode];
+        setElements(newNodes, edges);
+        return newNodes;
+      });
       toast.success(`Added new ${type.replace('-', ' ')}`);
     },
-    [nodes.length, setNodes],
+    [nodes.length, setNodes, edges, setElements],
   );
 
-  const onNodeDragStart: OnNodeDragStart = useCallback(() => {
-    document.body.classList.add('dragging');
-  }, []);
+  useEffect(() => {
+    const handleKeyboard = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case 'z':
+            event.preventDefault();
+            undo();
+            break;
+          case 'y':
+            event.preventDefault();
+            redo();
+            break;
+          case 's':
+            event.preventDefault();
+            localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
+            toast.success('Flow saved');
+            break;
+        }
+      }
+    };
 
-  const onNodeDragStop: OnNodeDragStop = useCallback(() => {
-    document.body.classList.remove('dragging');
-  }, []);
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
+  }, [nodes, edges, undo, redo]);
+
+  // Autosave every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
+      toast.success('Flow auto-saved');
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [nodes, edges]);
 
   return (
     <div className="w-screen h-screen bg-background">
@@ -123,13 +159,15 @@ const Index = () => {
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
         onEdgeClick={(_, edge) => {
-          setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+          setEdges((eds) => {
+            const newEdges = eds.filter((e) => e.id !== edge.id);
+            setElements(nodes, newEdges);
+            return newEdges;
+          });
           toast.success('Edge deleted');
         }}
         onDragOver={onDragOver}
         onDrop={onDrop}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDragStop={onNodeDragStop}
         fitView
         className="bg-muted/10 transition-colors duration-200"
         minZoom={0.2}
@@ -159,6 +197,11 @@ const Index = () => {
           </div>
           <FlowControls />
           <EdgeControls />
+          <Link to="/shortcuts">
+            <Button variant="outline" className="w-full">
+              View Shortcuts
+            </Button>
+          </Link>
         </Panel>
         <Panel position="top-right" className="flex gap-2">
           <ThemeToggle />

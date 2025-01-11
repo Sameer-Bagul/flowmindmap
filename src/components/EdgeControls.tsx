@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useReactFlow, Edge } from '@xyflow/react';
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const defaultEdgeStyle = {
   stroke: '#3b82f6',
@@ -14,10 +15,10 @@ const defaultEdgeStyle = {
 };
 
 export const EdgeControls = () => {
-  const { setEdges, getEdges } = useReactFlow();
+  const { setEdges, getEdges, getNodes } = useReactFlow();
 
   const updateEdgeStyle = (style: string) => {
-    setEdges((eds: Edge[]) =>
+    setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
         type: style,
@@ -28,7 +29,7 @@ export const EdgeControls = () => {
   };
 
   const toggleEdgeAnimation = () => {
-    setEdges((eds: Edge[]) =>
+    setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
         animated: !edge.animated,
@@ -39,7 +40,7 @@ export const EdgeControls = () => {
   };
 
   const updateEdgeColor = (color: string) => {
-    setEdges((eds: Edge[]) =>
+    setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
         style: { 
@@ -47,17 +48,13 @@ export const EdgeControls = () => {
           stroke: color,
           strokeWidth: edge.style?.strokeWidth || 2
         },
-        markerEnd: edge.markerEnd ? {
-          ...edge.markerEnd,
-          color: color
-        } : undefined
       }))
     );
     toast.success('Edge color updated');
   };
 
   const updateEdgeWidth = (width: number) => {
-    setEdges((eds: Edge[]) =>
+    setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
         style: { ...edge.style, strokeWidth: width }
@@ -66,34 +63,47 @@ export const EdgeControls = () => {
     toast.success('Edge width updated');
   };
 
-  const downloadImage = () => {
+  const downloadPDF = async () => {
     const element = document.querySelector('.react-flow__viewport') as HTMLElement;
     if (!element) {
       toast.error('Could not find flow element');
       return;
     }
 
-    const scale = 2;
-    toPng(element, {
-      backgroundColor: '#ffffff',
-      width: element.offsetWidth * scale,
-      height: element.offsetHeight * scale,
-      style: {
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left',
-      },
-    })
-      .then((dataUrl) => {
-        const link = document.createElement('a');
-        link.download = 'mindmap.png';
-        link.href = dataUrl;
-        link.click();
-        toast.success('Flow image downloaded');
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        toast.error('Failed to download image');
+    try {
+      const nodes = getNodes();
+      const bounds = nodes.reduce(
+        (acc, node) => ({
+          minX: Math.min(acc.minX, node.position.x),
+          minY: Math.min(acc.minY, node.position.y),
+          maxX: Math.max(acc.maxX, node.position.x + (node.width || 0)),
+          maxY: Math.max(acc.maxY, node.position.y + (node.height || 0)),
+        }),
+        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+      );
+
+      element.style.width = `${bounds.maxX - bounds.minX + 100}px`;
+      element.style.height = `${bounds.maxY - bounds.minY + 100}px`;
+
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#ffffff',
+        scale: 2,
       });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save('mindmap.pdf');
+      toast.success('Flow exported as PDF');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to export PDF');
+    }
   };
 
   return (
@@ -137,8 +147,8 @@ export const EdgeControls = () => {
         <Switch onCheckedChange={toggleEdgeAnimation} />
       </div>
 
-      <Button onClick={downloadImage} variant="secondary" className="w-full">
-        Download Flow Image
+      <Button onClick={downloadPDF} variant="secondary" className="w-full">
+        Download as PDF
       </Button>
     </div>
   );
