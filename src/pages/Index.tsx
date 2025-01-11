@@ -12,7 +12,8 @@ import {
   Connection,
   Panel,
   ConnectionMode,
-  NodeDragHandler,
+  OnNodeDragStart,
+  OnNodeDragStop,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,6 @@ const Index = () => {
       const type = event.dataTransfer.getData('application/reactflow') as NoteType;
       if (!type) return;
 
-      // Get the position of the drop relative to the flow viewport
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const position = {
         x: event.clientX - reactFlowBounds.left,
@@ -103,13 +103,11 @@ const Index = () => {
     [nodes.length, setNodes],
   );
 
-  const onNodeDragStart: NodeDragHandler = useCallback(() => {
-    // Hide all handles when dragging starts
+  const onNodeDragStart: OnNodeDragStart = useCallback(() => {
     document.body.classList.add('dragging');
   }, []);
 
-  const onNodeDragStop: NodeDragHandler = useCallback(() => {
-    // Show handles again when dragging stops
+  const onNodeDragStop: OnNodeDragStop = useCallback(() => {
     document.body.classList.remove('dragging');
   }, []);
 

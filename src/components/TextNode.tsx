@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import type { Handle as HandleType, Position } from '@xyflow/react';
+import { Handle, useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -15,6 +16,13 @@ import { Label } from '@/components/ui/label';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
+interface HandleData {
+  id: string;
+  position: Position;
+  x: number;
+  y: number;
+}
+
 export interface TextNodeData {
   label: string;
   content?: string;
@@ -23,14 +31,7 @@ export interface TextNodeData {
   borderColor?: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video' | 'link';
-  handles?: Handle[];
-}
-
-interface Handle {
-  id: string;
-  position: Position;
-  x: number;
-  y: number;
+  handles?: HandleData[];
 }
 
 const getDefaultColors = (type: NoteType) => {
@@ -339,19 +340,16 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
               const x = e.clientX - rect.left;
               const y = e.clientY - rect.top;
               
-              // Create dynamic handle
               setNodes(nodes => 
                 nodes.map(node => {
                   if (node.id === id) {
                     const handleId = `${side}-${Date.now()}`;
+                    const handles = node.data.handles || [];
                     return {
                       ...node,
                       data: {
                         ...node.data,
-                        handles: [
-                          ...(node.data.handles || []),
-                          { id: handleId, position, x, y }
-                        ]
+                        handles: [...handles, { id: handleId, position, x, y }]
                       }
                     };
                   }
@@ -361,7 +359,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             }}
           />
         ))}
-        {(data.handles || []).map((handle: Handle) => (
+        {(data.handles || []).map((handle: HandleData) => (
           <Handle
             key={handle.id}
             type="source"
