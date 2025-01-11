@@ -3,8 +3,6 @@ import type { Handle as HandleType, Position } from '@xyflow/react';
 import { Handle, useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, Settings2, Image, Link, Video } from "lucide-react";
@@ -13,6 +11,7 @@ import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from '@/components/ui/label';
+import { NoteEditor } from './NoteEditor';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
@@ -38,23 +37,23 @@ const getDefaultColors = (type: NoteType) => {
   switch (type) {
     case 'chapter':
       return {
-        bg: '#fef3c7',
+        bg: 'rgba(254, 243, 199, 0.7)',
         border: '#f59e0b',
         badge: 'warning'
       };
     case 'main-topic':
       return {
-        bg: '#dbeafe',
+        bg: 'rgba(219, 234, 254, 0.7)',
         border: '#3b82f6',
         badge: 'secondary'
       };
     case 'sub-topic':
       return {
-        bg: '#dcfce7',
+        bg: 'rgba(220, 252, 231, 0.7)',
         border: '#22c55e',
         badge: 'default'
       };
-  };
+  }
 };
 
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
@@ -63,33 +62,6 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
   const { deleteElements, setNodes } = useReactFlow();
   const nodeRef = useRef<HTMLDivElement>(null);
   const defaultColors = getDefaultColors(data.type);
-
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: data.content || '',
-    editable: true,
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] p-2',
-      },
-    },
-    onUpdate: ({ editor }) => {
-      setNodes(nodes => 
-        nodes.map(node => {
-          if (node.id === id) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                content: editor.getHTML()
-              }
-            };
-          }
-          return node;
-        })
-      );
-    },
-  });
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -134,95 +106,46 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
-          const newData = { ...node.data, [key]: color };
-          return { ...node, data: newData };
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              [key]: color
+            }
+          };
         }
         return node;
       })
     );
   }, [id, setNodes]);
 
-  const handleMediaInput = (type: 'image' | 'video' | 'link') => {
-    const url = prompt(`Enter ${type} URL:`);
-    if (url) {
-      setNodes(nodes => 
-        nodes.map(node => {
-          if (node.id === id) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                mediaUrl: url,
-                mediaType: type
-              }
-            };
-          }
-          return node;
-        })
-      );
-      toast.success(`${type} added successfully`);
-    }
-  };
-
-  const renderMedia = () => {
-    if (!data.mediaUrl) return null;
-    
-    switch (data.mediaType) {
-      case 'image':
-        return (
-          <img 
-            src={data.mediaUrl} 
-            alt="Node media" 
-            className="max-w-full h-auto rounded-lg mb-2"
-          />
-        );
-      case 'video':
-        if (data.mediaUrl.includes('youtube.com') || data.mediaUrl.includes('youtu.be')) {
-          const videoId = data.mediaUrl.includes('youtu.be') 
-            ? data.mediaUrl.split('/').pop() 
-            : new URLSearchParams(new URL(data.mediaUrl).search).get('v');
-          return (
-            <iframe
-              width="100%"
-              height="200"
-              src={`https://www.youtube.com/embed/${videoId}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="rounded-lg mb-2"
-            />
-          );
+  const handleContentChange = useCallback((content: string) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              content
+            }
+          };
         }
-        return (
-          <video 
-            src={data.mediaUrl} 
-            controls 
-            className="max-w-full h-auto rounded-lg mb-2"
-          />
-        );
-      case 'link':
-        return (
-          <a 
-            href={data.mediaUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-primary hover:underline mb-2 block"
-          >
-            {data.mediaUrl}
-          </a>
-        );
-      default:
-        return null;
-    }
-  };
+        return node;
+      })
+    );
+  }, [id, setNodes]);
 
   return (
     <Card 
       ref={nodeRef}
       className={cn(
         "min-w-[350px] min-h-[250px] p-6",
-        "bg-white/80 dark:bg-white/80", // Keep light appearance in dark mode
-        "backdrop-blur-lg border-2",
-        "shadow-xl hover:shadow-2xl transition-shadow duration-200"
+        "bg-white/80 dark:bg-white/80",
+        "backdrop-blur-xl border-2",
+        "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
+        "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
+        "transition-shadow duration-200"
       )}
       style={{
         backgroundColor: data.backgroundColor || defaultColors.bg,
@@ -231,7 +154,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     >
       <div className="h-full flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <Badge variant={defaultColors.badge as any} className="capitalize">
+          <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
             {data.type.replace('-', ' ')}
           </Badge>
           <div className="flex gap-2 items-center">
@@ -241,7 +164,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
                   <Settings2 className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-60 flex flex-col gap-4">
+              <PopoverContent className="w-60 flex flex-col gap-4 bg-white/80 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <Label>Background</Label>
                   <ColorPicker
@@ -268,6 +191,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             </Button>
           </div>
         </div>
+
         {isEditing ? (
           <Input
             type="text"
@@ -276,52 +200,21 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             autoFocus
-            className="text-lg font-medium"
+            className="text-lg font-medium bg-white/50 backdrop-blur-sm text-gray-800"
             placeholder="Enter note title..."
           />
         ) : (
           <div
             onDoubleClick={handleDoubleClick}
-            className="text-lg font-medium cursor-text select-none min-h-[40px] flex items-center"
+            className="text-lg font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
           >
             {label || 'Double click to edit'}
           </div>
         )}
-        <div className="flex gap-2 justify-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleMediaInput('image')}
-          >
-            <Image className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleMediaInput('video')}
-          >
-            <Video className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleMediaInput('link')}
-          >
-            <Link className="h-4 w-4" />
-          </Button>
-        </div>
 
-        {renderMedia()}
-        
-        <div 
-          className="flex-1 rounded-lg text-sm text-foreground border cursor-text hover:border-ring dark:bg-background/50 bg-background/50"
-        >
-          <EditorContent editor={editor} />
-        </div>
+        <NoteEditor content={data.content || ''} onChange={handleContentChange} />
       </div>
+
       <div className="absolute inset-0 pointer-events-none">
         {['top', 'right', 'bottom', 'left'].map((position) => (
           <Handle

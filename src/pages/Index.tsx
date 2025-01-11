@@ -1,4 +1,3 @@
-import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -12,39 +11,21 @@ import {
   Connection,
   ConnectionMode,
   Panel,
-  NodeProps,
   GetMiniMapNodeAttribute,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { BookOpen, ListTodo, FileText } from "lucide-react";
 import nodeTypes from '../components/nodeTypes';
-import type { NoteType } from '../components/TextNode';
 import { toast } from "sonner";
 import { EdgeControls } from '@/components/EdgeControls';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
-import { Link } from 'react-router-dom';
+import { FlowToolbar } from '@/components/FlowToolbar';
 
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
-
-// Define node defaults for different types
-const nodeDefaults = {
-  'chapter': {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderColor: '#E2E8F0',
-  },
-  'main-topic': {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderColor: '#E2E8F0',
-  },
-  'sub-topic': {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderColor: '#E2E8F0',
-  },
-};
 
 const defaultEdgeOptions = {
   animated: true,
@@ -101,7 +82,6 @@ const Index = () => {
         data: { 
           label: `New ${type.replace('-', ' ')}`,
           type,
-          ...nodeDefaults[type]
         },
       };
 
@@ -140,7 +120,6 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, [nodes, edges, undo, redo]);
 
-  // Autosave every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
@@ -151,7 +130,7 @@ const Index = () => {
   }, [nodes, edges]);
 
   const getNodeColor: GetMiniMapNodeAttribute<Node> = (node) => {
-    return node.data?.backgroundColor || '#fff';
+    return (node.data?.backgroundColor as string) || '#fff';
   };
 
   return (
@@ -173,27 +152,7 @@ const Index = () => {
         onDrop={onDrop}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 bg-background/60 p-2 rounded-lg backdrop-blur-sm border shadow-sm">
-            {[
-              { type: 'chapter', icon: BookOpen, label: 'Chapter' },
-              { type: 'main-topic', icon: ListTodo, label: 'Main Topic' },
-              { type: 'sub-topic', icon: FileText, label: 'Sub Topic' },
-            ].map(({ type, icon: Icon, label }) => (
-              <Button
-                key={type}
-                variant="secondary"
-                className="gap-2 justify-start cursor-grab active:cursor-grabbing"
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.setData('application/reactflow', type);
-                  event.dataTransfer.effectAllowed = 'move';
-                }}
-              >
-                <Icon className="h-4 w-4" />
-                Drag {label}
-              </Button>
-            ))}
-          </div>
+          <FlowToolbar />
           <FlowControls />
           <EdgeControls />
           <Link to="/shortcuts">
