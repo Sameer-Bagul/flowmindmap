@@ -11,6 +11,9 @@ import {
   Edge,
   Connection,
   ConnectionMode,
+  Panel,
+  NodeProps,
+  GetMiniMapNodeAttribute,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from "@/components/ui/button";
@@ -27,6 +30,22 @@ import { Link } from 'react-router-dom';
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
+// Define node defaults for different types
+const nodeDefaults = {
+  'chapter': {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: '#E2E8F0',
+  },
+  'main-topic': {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: '#E2E8F0',
+  },
+  'sub-topic': {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: '#E2E8F0',
+  },
+};
+
 const defaultEdgeOptions = {
   animated: true,
   style: {
@@ -38,7 +57,7 @@ const defaultEdgeOptions = {
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setElements } = useFlowStore();
+  const { setElements, undo, redo } = useFlowStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -131,6 +150,10 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [nodes, edges]);
 
+  const getNodeColor: GetMiniMapNodeAttribute<Node> = (node) => {
+    return node.data?.backgroundColor || '#fff';
+  };
+
   return (
     <div className="w-screen h-screen bg-background">
       <ReactFlow
@@ -146,6 +169,8 @@ const Index = () => {
         className="bg-muted/10 transition-colors duration-200"
         minZoom={0.2}
         maxZoom={4}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 bg-background/60 p-2 rounded-lg backdrop-blur-sm border shadow-sm">
@@ -183,9 +208,7 @@ const Index = () => {
         <Controls className="bg-background/60 border shadow-sm" />
         <MiniMap 
           className="bg-background/60 border shadow-sm !bottom-5 !right-5"
-          nodeColor={(node) => {
-            return node.data?.backgroundColor || '#fff';
-          }}
+          nodeColor={getNodeColor}
           maskColor="rgba(0, 0, 0, 0.1)"
         />
         <Background color="#ccc" gap={16} size={1} />
