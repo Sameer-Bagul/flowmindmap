@@ -23,6 +23,14 @@ export interface TextNodeData {
   borderColor?: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video' | 'link';
+  handles?: Handle[];
+}
+
+interface Handle {
+  id: string;
+  position: Position;
+  x: number;
+  y: number;
 }
 
 const getDefaultColors = (type: NoteType) => {
@@ -353,7 +361,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             }}
           />
         ))}
-        {data.handles?.map((handle) => (
+        {(data.handles || []).map((handle: Handle) => (
           <Handle
             key={handle.id}
             type="source"
