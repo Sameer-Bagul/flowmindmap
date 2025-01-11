@@ -18,17 +18,17 @@ export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-[3rem] h-[3rem] p-0 rounded-full"
+          className="w-8 h-8 p-0 rounded-full"
           style={{ backgroundColor: value }}
         />
       </PopoverTrigger>
-      <PopoverContent className="w-[12rem] p-3">
-        <div className="grid grid-cols-4 gap-2">
+      <PopoverContent className="w-[8rem] p-2">
+        <div className="grid grid-cols-4 gap-1">
           {colors.map((color) => (
             <button
               key={color}
               className={cn(
-                "w-8 h-8 rounded-full transition-all duration-200 hover:scale-110",
+                "w-6 h-6 rounded-full transition-all duration-200 hover:scale-110",
                 value === color && "ring-2 ring-primary ring-offset-2"
               )}
               style={{ backgroundColor: color }}

@@ -8,6 +8,11 @@ import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { toPng } from 'html-to-image';
 
+const defaultEdgeStyle = {
+  stroke: '#3b82f6',
+  strokeWidth: 2,
+};
+
 export const EdgeControls = () => {
   const { setEdges, getEdges, getNodes, screenToFlowPosition } = useReactFlow();
 
@@ -16,6 +21,7 @@ export const EdgeControls = () => {
       eds.map((edge: Edge) => ({
         ...edge,
         type: style,
+        style: edge.style || defaultEdgeStyle,
       }))
     );
     toast.success(`Edge style updated to ${style}`);
@@ -38,8 +44,8 @@ export const EdgeControls = () => {
         ...edge,
         markerEnd: edge.markerEnd ? undefined : { 
           type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
+          width: 15,
+          height: 15,
           color: edge.style?.stroke || '#000000'
         },
       }))
@@ -59,7 +65,9 @@ export const EdgeControls = () => {
         },
         markerEnd: edge.markerEnd ? {
           ...edge.markerEnd,
-          color: color
+          color: color,
+          width: 15,
+          height: 15
         } : undefined
       }))
     );
