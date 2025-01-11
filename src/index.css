@@ -63,7 +63,16 @@
 }
 
 .react-flow__handle {
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-200 opacity-0;
+}
+
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle {
+  @apply opacity-100;
+}
+
+body.dragging .react-flow__handle {
+  @apply opacity-0 !important;
 }
 
 .react-flow__handle:hover {
@@ -79,10 +88,11 @@
 }
 
 .react-flow__minimap {
-  background-color: var(--background);
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
-  overflow: hidden;
+  @apply bg-background/60 backdrop-blur-sm border rounded-lg overflow-hidden;
+}
+
+.react-flow__minimap-mask {
+  @apply fill-muted/30;
 }
 
 .react-flow__attribution {
@@ -97,53 +107,26 @@
   @apply border-border/50 bg-background/80 text-foreground;
 }
 
-.dark .react-flow__minimap-mask {
-  @apply fill-muted/30;
-}
-
-.dark .react-flow__edge-path {
-  stroke: hsl(var(--primary));
-  stroke-opacity: 0.7;
-}
-
-.dark .react-flow__controls {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
-}
-
-.dark .react-flow__controls-button {
-  background-color: hsl(var(--background));
-  border-bottom: 1px solid hsl(var(--border));
-  color: hsl(var(--foreground));
-}
-
-.dark .react-flow__controls-button:hover {
-  background-color: hsl(var(--accent));
-}
-
 .react-flow__edge {
-  transition: stroke-width 0.2s;
+  @apply transition-all duration-200;
 }
 
 .react-flow__edge:hover {
-  stroke-width: 3px;
+  @apply stroke-[3px];
 }
 
 .react-flow__edge-path {
-  stroke-width: 2px;
+  @apply stroke-[2px];
 }
 
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: hsl(var(--primary));
-  stroke-width: 3px;
+  @apply stroke-primary stroke-[3px];
 }
 
-.react-flow__handle {
-  opacity: 0;
-  transition: opacity 0.2s;
+.prose {
+  @apply max-w-none;
 }
 
-.react-flow__node:hover .react-flow__handle {
-  opacity: 1;
+.dark .prose {
+  @apply prose-invert;
 }

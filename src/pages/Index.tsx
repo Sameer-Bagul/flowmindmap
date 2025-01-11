@@ -12,6 +12,7 @@ import {
   Connection,
   Panel,
   ConnectionMode,
+  NodeDragHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from "@/components/ui/button";
@@ -23,18 +24,7 @@ import { EdgeControls } from '@/components/EdgeControls';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 
-const initialNodes: Node[] = [
-  {
-    id: '1',
-    type: 'textNode',
-    data: { 
-      label: 'My First Chapter',
-      type: 'chapter' as NoteType,
-    },
-    position: { x: 250, y: 100 },
-  },
-];
-
+const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
 const defaultEdgeOptions = {
@@ -45,33 +35,83 @@ const defaultEdgeOptions = {
   },
 };
 
+const nodeDefaults = {
+  chapter: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#f59e0b',
+  },
+  'main-topic': {
+    backgroundColor: '#dbeafe',
+    borderColor: '#3b82f6',
+  },
+  'sub-topic': {
+    backgroundColor: '#dcfce7',
+    borderColor: '#22c55e',
+  },
+};
+
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'default' }, eds)),
+    (params: Connection) => {
+      setEdges((eds) => addEdge({
+        ...params,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
+      }, eds));
+      toast.success('Nodes connected successfully');
+    },
     [setEdges],
   );
 
-  const addNewNode = useCallback((type: NoteType) => {
-    const newNode = {
-      id: `${nodes.length + 1}`,
-      type: 'textNode',
-      data: { 
-        label: `New ${type.replace('-', ' ')}`,
-        type 
-      },
-      position: { x: Math.random() * 500, y: Math.random() * 500 },
-    };
-    setNodes((nds) => [...nds, newNode]);
-    toast.success(`Added new ${type.replace('-', ' ')}`);
-  }, [nodes.length, setNodes]);
+  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
-  const onEdgeDelete = useCallback((edge: Edge) => {
-    setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-    toast.success('Edge deleted');
-  }, [setEdges]);
+  const onDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData('application/reactflow') as NoteType;
+      if (!type) return;
+
+      // Get the position of the drop relative to the flow viewport
+      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+      const position = {
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      };
+
+      const newNode = {
+        id: `${nodes.length + 1}`,
+        type: 'textNode',
+        position,
+        data: { 
+          label: `New ${type.replace('-', ' ')}`,
+          type,
+          ...nodeDefaults[type]
+        },
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+      toast.success(`Added new ${type.replace('-', ' ')}`);
+    },
+    [nodes.length, setNodes],
+  );
+
+  const onNodeDragStart: NodeDragHandler = useCallback(() => {
+    // Hide all handles when dragging starts
+    document.body.classList.add('dragging');
+  }, []);
+
+  const onNodeDragStop: NodeDragHandler = useCallback(() => {
+    // Show handles again when dragging stops
+    document.body.classList.remove('dragging');
+  }, []);
 
   return (
     <div className="w-screen h-screen bg-background">
@@ -84,24 +124,40 @@ const Index = () => {
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
-        onEdgeClick={(_, edge) => onEdgeDelete(edge)}
+        onEdgeClick={(_, edge) => {
+          setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+          toast.success('Edge deleted');
+        }}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDragStop={onNodeDragStop}
         fitView
         className="bg-muted/10 transition-colors duration-200"
+        minZoom={0.2}
+        maxZoom={4}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 bg-background/60 p-2 rounded-lg backdrop-blur-sm border shadow-sm">
-            <Button onClick={() => addNewNode('chapter')} variant="secondary" className="gap-2 justify-start">
-              <BookOpen className="h-4 w-4" />
-              Add Chapter
-            </Button>
-            <Button onClick={() => addNewNode('main-topic')} variant="secondary" className="gap-2 justify-start">
-              <ListTodo className="h-4 w-4" />
-              Add Main Topic
-            </Button>
-            <Button onClick={() => addNewNode('sub-topic')} variant="secondary" className="gap-2 justify-start">
-              <FileText className="h-4 w-4" />
-              Add Sub Topic
-            </Button>
+            {[
+              { type: 'chapter', icon: BookOpen, label: 'Chapter' },
+              { type: 'main-topic', icon: ListTodo, label: 'Main Topic' },
+              { type: 'sub-topic', icon: FileText, label: 'Sub Topic' },
+            ].map(({ type, icon: Icon, label }) => (
+              <Button
+                key={type}
+                variant="secondary"
+                className="gap-2 justify-start cursor-grab active:cursor-grabbing"
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.setData('application/reactflow', type);
+                  event.dataTransfer.effectAllowed = 'move';
+                }}
+              >
+                <Icon className="h-4 w-4" />
+                Drag {label}
+              </Button>
+            ))}
           </div>
           <FlowControls />
           <EdgeControls />
@@ -110,7 +166,14 @@ const Index = () => {
           <ThemeToggle />
         </Panel>
         <Controls className="bg-background/60 border shadow-sm" />
-        <MiniMap className="bg-background/60 border shadow-sm" />
+        <MiniMap 
+          className="bg-background/60 border shadow-sm !bottom-5 !right-5"
+          nodeColor={(node) => {
+            const type = (node.data?.type || 'default') as NoteType;
+            return nodeDefaults[type]?.backgroundColor || '#fff';
+          }}
+          maskColor="rgba(0, 0, 0, 0.1)"
+        />
         <Background color="#ccc" gap={16} size={1} />
       </ReactFlow>
     </div>

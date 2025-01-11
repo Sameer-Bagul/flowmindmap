@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useReactFlow, MarkerType, Panel, Edge } from "@xyflow/react";
+import { useReactFlow, Edge } from '@xyflow/react';
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { toPng } from 'html-to-image';
@@ -14,11 +14,11 @@ const defaultEdgeStyle = {
 };
 
 export const EdgeControls = () => {
-  const { setEdges, getEdges, getNodes, screenToFlowPosition } = useReactFlow();
+  const { setEdges, getEdges } = useReactFlow();
 
   const updateEdgeStyle = (style: string) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge: Edge) => ({
+      eds.map((edge) => ({
         ...edge,
         type: style,
         style: edge.style || defaultEdgeStyle,
@@ -29,7 +29,7 @@ export const EdgeControls = () => {
 
   const toggleEdgeAnimation = () => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge: Edge) => ({
+      eds.map((edge) => ({
         ...edge,
         animated: !edge.animated,
       }))
@@ -38,25 +38,9 @@ export const EdgeControls = () => {
     toast.success(`Edge animation ${isAnimated ? 'enabled' : 'disabled'}`);
   };
 
-  const toggleEdgeArrows = () => {
-    setEdges((eds: Edge[]) =>
-      eds.map((edge: Edge) => ({
-        ...edge,
-        markerEnd: edge.markerEnd ? undefined : { 
-          type: MarkerType.ArrowClosed,
-          width: 15,
-          height: 15,
-          color: edge.style?.stroke || '#000000'
-        },
-      }))
-    );
-    const hasArrows = !getEdges()[0]?.markerEnd;
-    toast.success(`Edge arrows ${hasArrows ? 'enabled' : 'disabled'}`);
-  };
-
   const updateEdgeColor = (color: string) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge: Edge) => ({
+      eds.map((edge) => ({
         ...edge,
         style: { 
           ...edge.style, 
@@ -65,9 +49,7 @@ export const EdgeControls = () => {
         },
         markerEnd: edge.markerEnd ? {
           ...edge.markerEnd,
-          color: color,
-          width: 15,
-          height: 15
+          color: color
         } : undefined
       }))
     );
@@ -76,7 +58,7 @@ export const EdgeControls = () => {
 
   const updateEdgeWidth = (width: number) => {
     setEdges((eds: Edge[]) =>
-      eds.map((edge: Edge) => ({
+      eds.map((edge) => ({
         ...edge,
         style: { ...edge.style, strokeWidth: width }
       }))
@@ -92,13 +74,10 @@ export const EdgeControls = () => {
     }
 
     const scale = 2;
-    const width = element.offsetWidth * scale;
-    const height = element.offsetHeight * scale;
-
     toPng(element, {
       backgroundColor: '#ffffff',
-      width,
-      height,
+      width: element.offsetWidth * scale,
+      height: element.offsetHeight * scale,
       style: {
         transform: `scale(${scale})`,
         transformOrigin: 'top left',
@@ -106,7 +85,7 @@ export const EdgeControls = () => {
     })
       .then((dataUrl) => {
         const link = document.createElement('a');
-        link.download = 'flow.png';
+        link.download = 'mindmap.png';
         link.href = dataUrl;
         link.click();
         toast.success('Flow image downloaded');
@@ -121,7 +100,7 @@ export const EdgeControls = () => {
     <div className="flex flex-col gap-4 p-4 bg-background/60 backdrop-blur-sm rounded-lg border shadow-sm">
       <div className="space-y-2">
         <Label>Edge Style</Label>
-        <Select onValueChange={updateEdgeStyle} defaultValue="default">
+        <Select onValueChange={updateEdgeStyle} defaultValue="smoothstep">
           <SelectTrigger>
             <SelectValue placeholder="Select edge style" />
           </SelectTrigger>
@@ -134,10 +113,10 @@ export const EdgeControls = () => {
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="flex items-center justify-between gap-4">
         <Label>Edge Color</Label>
         <ColorPicker
-          value={getEdges()[0]?.style?.stroke || '#000000'}
+          value={getEdges()[0]?.style?.stroke || '#3b82f6'}
           onChange={updateEdgeColor}
         />
       </div>
@@ -156,11 +135,6 @@ export const EdgeControls = () => {
       <div className="flex items-center justify-between">
         <Label>Animate Edges</Label>
         <Switch onCheckedChange={toggleEdgeAnimation} />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <Label>Show Arrows</Label>
-        <Switch onCheckedChange={toggleEdgeArrows} />
       </div>
 
       <Button onClick={downloadImage} variant="secondary" className="w-full">
