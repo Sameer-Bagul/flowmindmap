@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -23,6 +24,9 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
+
+// Define the NoteType type
+type NoteType = 'text-note' | 'task-note' | 'idea-note';
 
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
