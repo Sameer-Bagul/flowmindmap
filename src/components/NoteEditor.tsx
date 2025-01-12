@@ -7,10 +7,12 @@ interface NoteEditorProps {
   onChange: (content: string) => void;
 }
 
+const defaultContent = '<p></p>'; // Default empty paragraph
+
 export const NoteEditor = ({ content, onChange }: NoteEditorProps) => {
   const editor = useEditor({
     extensions: [StarterKit],
-    content,
+    content: content || defaultContent, // Use provided content or default
     editable: true,
     editorProps: {
       attributes: {
