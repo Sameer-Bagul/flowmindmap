@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useReactFlow, Edge } from '@xyflow/react';
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
@@ -12,6 +13,7 @@ import jsPDF from 'jspdf';
 const defaultEdgeStyle = {
   stroke: '#3b82f6',
   strokeWidth: 2,
+  opacity: 1,
 };
 
 export const EdgeControls = () => {
@@ -61,6 +63,38 @@ export const EdgeControls = () => {
       }))
     );
     toast.success('Edge width updated');
+  };
+
+  const updateEdgeOpacity = (opacity: number) => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        style: { ...edge.style, opacity }
+      }))
+    );
+    toast.success('Edge opacity updated');
+  };
+
+  const updateEdgeLabel = (label: string) => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        label
+      }))
+    );
+    toast.success('Edge label updated');
+  };
+
+  const resetEdgeStyles = () => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        style: defaultEdgeStyle,
+        animated: false,
+        label: ''
+      }))
+    );
+    toast.success('Edge styles reset to default');
   };
 
   const downloadPDF = async () => {
@@ -142,10 +176,33 @@ export const EdgeControls = () => {
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Edge Opacity</Label>
+        <Slider
+          defaultValue={[1]}
+          max={1}
+          min={0}
+          step={0.1}
+          onValueChange={(value) => updateEdgeOpacity(value[0])}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Edge Label</Label>
+        <Input
+          placeholder="Enter edge label"
+          onChange={(e) => updateEdgeLabel(e.target.value)}
+        />
+      </div>
+
       <div className="flex items-center justify-between">
         <Label>Animate Edges</Label>
         <Switch onCheckedChange={toggleEdgeAnimation} />
       </div>
+
+      <Button onClick={resetEdgeStyles} variant="secondary" className="w-full">
+        Reset Edge Styles
+      </Button>
 
       <Button onClick={downloadPDF} variant="secondary" className="w-full">
         Download as PDF

@@ -8,17 +8,17 @@ const colors = [
 ];
 
 interface ColorPickerProps {
-  value: string;
+  value?: string;
   onChange: (color: string) => void;
 }
 
-export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
+export const ColorPicker = ({ value = "#000000", onChange }: ColorPickerProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-8 h-8 p-0 rounded-full"
+          className="w-8 h-8 p-0 rounded-md"
           style={{ backgroundColor: value }}
         />
       </PopoverTrigger>
@@ -28,7 +28,7 @@ export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
             <button
               key={color}
               className={cn(
-                "w-6 h-6 rounded-full transition-all duration-200 hover:scale-110",
+                "w-6 h-6 rounded-md transition-all duration-200 hover:scale-105",
                 value === color && "ring-2 ring-primary ring-offset-2"
               )}
               style={{ backgroundColor: color }}

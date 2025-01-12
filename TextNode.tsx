@@ -2,17 +2,16 @@ import { useState, useCallback, useRef } from 'react';
 import type { Handle as HandleType, Position } from '@xyflow/react';
 import { Handle, useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings2 } from "lucide-react";
+import { Trash2, Settings2, Image, Link, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from '@/components/ui/label';
-import { Slate, Editable, withReact } from 'slate-react';
-import { createEditor } from 'slate';
-import { withHistory } from 'slate-history';
+import { NoteEditor } from './NoteEditor';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
@@ -25,11 +24,12 @@ interface HandleData {
 
 export interface TextNodeData {
   label: string;
-  content?: any[]; // Slate editor content is an array of nodes
+  content?: string;
   type: NoteType;
   backgroundColor?: string;
   borderColor?: string;
-  notes?: string[]; // Store multiple notes
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video' | 'link';
   handles?: HandleData[];
 }
 
@@ -59,13 +59,9 @@ const getDefaultColors = (type: NoteType) => {
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
-  const [editorContent, setEditorContent] = useState(data.content || [{ type: 'paragraph', children: [{ text: '' }] }]);
-  const [notes, setNotes] = useState(data.notes || []);
-  const [newNote, setNewNote] = useState('');
   const { deleteElements, setNodes } = useReactFlow();
   const nodeRef = useRef<HTMLDivElement>(null);
   const defaultColors = getDefaultColors(data.type);
-  const editor = useRef(withHistory(withReact(createEditor()))).current;
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -91,12 +87,15 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     }
   }, [id, label, setNodes]);
 
-  const handleAddNote = useCallback(() => {
-    if (newNote.trim()) {
-      setNotes([...notes, newNote]);
-      setNewNote('');
-    }
-  }, [notes, newNote]);
+  const handleKeyDown = useCallback(
+    (evt: React.KeyboardEvent) => {
+      if (evt.key === 'Enter') {
+        evt.preventDefault();
+        handleBlur();
+      }
+    },
+    [handleBlur]
+  );
 
   const handleDelete = useCallback(() => {
     deleteElements({ nodes: [{ id }] });
@@ -120,11 +119,28 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
+  const handleContentChange = useCallback((content: string) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              content
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
   return (
     <Card 
       ref={nodeRef}
       className={cn(
-        "min-w-[350px] min-h-[300px] p-6",
+        "min-w-[350px] min-h-[250px] p-6",
         "bg-white/80 dark:bg-white/80",
         "backdrop-blur-xl border-2",
         "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
@@ -178,11 +194,13 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         </div>
 
         {isEditing ? (
-          <input
+          <Input
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
             className="text-lg font-medium bg-white/50 backdrop-blur-sm text-gray-800"
             placeholder="Enter note title..."
           />
@@ -195,30 +213,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
           </div>
         )}
 
-        <div className="border rounded-lg p-2 mt-2">
-          <Slate editor={editor} value={editorContent} onChange={setEditorContent}>
-            <Editable className="prose text-gray-800" placeholder="Write your content here..." />
-          </Slate>
-        </div>
-
-        <div className="mt-4">
-          <h4 className="text-sm font-medium">Additional Notes</h4>
-          <ul className="list-disc pl-4">
-            {notes.map((note, index) => (
-              <li key={index} className="text-sm text-gray-700">{note}</li>
-            ))}
-          </ul>
-          <div className="mt-2 flex gap-2">
-            <input
-              type="text"
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              className="text-sm border rounded px-2 py-1 flex-1"
-              placeholder="Add a note..."
-            />
-            <Button onClick={handleAddNote} size="sm">Add</Button>
-          </div>
-        </div>
+        <NoteEditor content={data.content || ''} onChange={handleContentChange} />
       </div>
 
       <div className="absolute inset-0 pointer-events-none">
