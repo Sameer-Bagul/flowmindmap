@@ -19,13 +19,12 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import nodeTypes from '../components/nodeTypes';
 import { toast } from "sonner";
-import { EdgeControls } from '@/components/EdgeControls';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
+import { EdgeContextMenu } from '@/components/EdgeContextMenu';
 
-// Define the NoteType type
 type NoteType = 'text-note' | 'task-note' | 'idea-note';
 
 const initialNodes: Node[] = [];
@@ -137,6 +136,12 @@ const Index = () => {
     return (node.data?.backgroundColor as string) || '#fff';
   };
 
+  const edgeWithContextMenu = edges.map((edge) => (
+    <EdgeContextMenu key={edge.id} edge={edge}>
+      <Edge {...edge} />
+    </EdgeContextMenu>
+  ));
+
   return (
     <div className="w-screen h-screen bg-background">
       <ReactFlow
@@ -154,11 +159,17 @@ const Index = () => {
         maxZoom={4}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        edgeTypes={{
+          default: (props) => (
+            <EdgeContextMenu edge={props}>
+              <Edge {...props} />
+            </EdgeContextMenu>
+          ),
+        }}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
           <FlowToolbar />
           <FlowControls />
-          <EdgeControls />
           <Link to="/shortcuts">
             <Button variant="outline" className="w-full">
               View Shortcuts
