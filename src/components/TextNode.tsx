@@ -31,27 +31,33 @@ export interface TextNodeData {
   handles?: HandleData[];
 }
 
-const getDefaultColors = (type: NoteType) => {
-  switch (type) {
-    case 'chapter':
-      return {
-        bg: 'rgba(254, 243, 199, 0.7)',
-        border: '#f59e0b',
-        badge: 'warning'
-      };
-    case 'main-topic':
-      return {
-        bg: 'rgba(219, 234, 254, 0.7)',
-        border: '#3b82f6',
-        badge: 'secondary'
-      };
-    case 'sub-topic':
-      return {
-        bg: 'rgba(220, 252, 231, 0.7)',
-        border: '#22c55e',
-        badge: 'default'
-      };
-  }
+interface ColorScheme {
+  bg: string;
+  border: string;
+  badge: string;
+}
+
+const getDefaultColors = (type: NoteType): ColorScheme => {
+  const defaults: Record<NoteType, ColorScheme> = {
+    'chapter': {
+      bg: 'rgba(254, 243, 199, 0.7)',
+      border: '#f59e0b',
+      badge: 'warning'
+    },
+    'main-topic': {
+      bg: 'rgba(219, 234, 254, 0.7)',
+      border: '#3b82f6',
+      badge: 'secondary'
+    },
+    'sub-topic': {
+      bg: 'rgba(220, 252, 231, 0.7)',
+      border: '#22c55e',
+      badge: 'default'
+    }
+  };
+
+  // Return the colors for the specified type, or default to chapter colors if type is invalid
+  return defaults[type] || defaults['chapter'];
 };
 
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
@@ -59,7 +65,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
   const [label, setLabel] = useState(data.label || '');
   const { deleteElements, setNodes } = useReactFlow();
   const nodeRef = useRef<HTMLDivElement>(null);
-  const defaultColors = getDefaultColors(data.type);
+  const defaultColors = getDefaultColors(data.type || 'chapter');
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -167,7 +173,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         <div className="h-full flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
-              {data.type.replace('-', ' ')}
+              {(data.type || 'chapter').replace('-', ' ')}
             </Badge>
             <div className="flex gap-2 items-center">
               <Popover>
