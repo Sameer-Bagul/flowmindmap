@@ -1,4 +1,3 @@
-import React, { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -32,6 +31,7 @@ const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
 const defaultEdgeOptions = {
+  type: 'smoothstep',
   animated: true,
   style: {
     strokeWidth: 2,
@@ -163,7 +163,15 @@ const Index = () => {
         edgeTypes={{
           default: (props) => (
             <EdgeContextMenu edge={props}>
-              <BaseEdge {...props} />
+              <BaseEdge 
+                path={props.path || ''}
+                {...props}
+                style={{
+                  ...props.style,
+                  strokeWidth: 2,
+                  stroke: props.style?.stroke || 'hsl(var(--primary))',
+                }}
+              />
             </EdgeContextMenu>
           ),
         }}

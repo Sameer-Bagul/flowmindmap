@@ -3,12 +3,10 @@ import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings2, Code2, Copy } from "lucide-react";
+import { Trash2, Code2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const languages = [
@@ -38,7 +36,7 @@ interface CodeNodeData {
 
 const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData; isConnectable?: boolean }) => {
   const [code, setCode] = useState(data.code || '// Write your code here');
-  const [language, setLanguage] = useState(data.language || 'javascript');
+  const [language, setLanguage] = useState(data.language || 'typescript');
   const [theme, setTheme] = useState(data.theme || 'vs-dark');
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -60,19 +58,19 @@ const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData;
         ref={nodeRef}
         className={cn(
           "min-w-[400px] min-h-[300px] p-4",
-          "bg-background/80 backdrop-blur-xl border-2",
-          "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
+          "bg-background/95 backdrop-blur-xl border-2",
+          "shadow-xl"
         )}
       >
         <div className="flex flex-col h-full gap-2">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="gap-2">
+          <div className="flex items-center justify-between bg-card p-2 rounded-t-lg border-b">
+            <Badge variant="outline" className="gap-2">
               <Code2 className="h-3 w-3" />
               Code Snippet
             </Badge>
             <div className="flex gap-2">
               <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[120px] h-8">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -84,7 +82,7 @@ const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData;
                 </SelectContent>
               </Select>
               <Select value={theme} onValueChange={setTheme}>
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger className="w-[100px] h-8">
                   <SelectValue placeholder="Theme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -95,7 +93,7 @@ const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData;
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="icon" onClick={handleCopy}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
@@ -114,6 +112,12 @@ const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData;
                 fontSize: 14,
                 wordWrap: 'on',
                 automaticLayout: true,
+                scrollBeyondLastLine: false,
+                lineNumbers: 'on',
+                glyphMargin: true,
+                folding: true,
+                lineDecorationsWidth: 10,
+                lineNumbersMinChars: 3,
               }}
             />
           </div>
