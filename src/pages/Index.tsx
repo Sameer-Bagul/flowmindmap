@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -12,6 +13,7 @@ import {
   Panel,
   GetMiniMapNodeAttribute,
   BaseEdge,
+  EdgeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -137,12 +139,6 @@ const Index = () => {
     return (node.data?.backgroundColor as string) || '#fff';
   };
 
-  const edgeWithContextMenu = edges.map((edge) => (
-    <EdgeContextMenu key={edge.id} edge={edge}>
-      <BaseEdge {...edge} />
-    </EdgeContextMenu>
-  ));
-
   return (
     <div className="w-screen h-screen bg-background">
       <ReactFlow
@@ -161,10 +157,9 @@ const Index = () => {
         onDragOver={onDragOver}
         onDrop={onDrop}
         edgeTypes={{
-          default: (props) => (
+          default: (props: EdgeProps) => (
             <EdgeContextMenu edge={props}>
               <BaseEdge 
-                path={props.path || ''}
                 {...props}
                 style={{
                   ...props.style,
