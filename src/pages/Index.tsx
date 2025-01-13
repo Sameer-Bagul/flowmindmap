@@ -8,11 +8,11 @@ import {
   useEdgesState,
   addEdge,
   Node,
-  Edge,
   Connection,
   ConnectionMode,
   Panel,
   GetMiniMapNodeAttribute,
+  BaseEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -24,6 +24,7 @@ import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { EdgeContextMenu } from '@/components/EdgeContextMenu';
+import type { Edge } from '@xyflow/react';
 
 type NoteType = 'text-note' | 'task-note' | 'idea-note';
 
@@ -138,7 +139,7 @@ const Index = () => {
 
   const edgeWithContextMenu = edges.map((edge) => (
     <EdgeContextMenu key={edge.id} edge={edge}>
-      <Edge {...edge} />
+      <BaseEdge {...edge} />
     </EdgeContextMenu>
   ));
 
@@ -162,7 +163,7 @@ const Index = () => {
         edgeTypes={{
           default: (props) => (
             <EdgeContextMenu edge={props}>
-              <Edge {...props} />
+              <BaseEdge {...props} />
             </EdgeContextMenu>
           ),
         }}
