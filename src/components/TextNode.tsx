@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { Handle as HandleType, Position } from '@xyflow/react';
-import { Handle, useReactFlow } from '@xyflow/react';
+import { Handle, useReactFlow, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
@@ -71,8 +71,14 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
       setNodes(nodes => 
         nodes.map(node => {
           if (node.id === id) {
+            // Round position coordinates to 2 decimal places
+            const position = {
+              x: Math.round(node.position.x * 100) / 100,
+              y: Math.round(node.position.y * 100) / 100
+            };
             return {
               ...node,
+              position,
               data: {
                 ...node.data,
                 label
@@ -135,101 +141,110 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
   }, [id, setNodes]);
 
   return (
-    <Card 
-      ref={nodeRef}
-      className={cn(
-        "min-w-[350px] min-h-[250px] p-6",
-        "bg-white/80 dark:bg-white/80",
-        "backdrop-blur-xl border-2",
-        "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
-        "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
-        "transition-shadow duration-200"
-      )}
-      style={{
-        backgroundColor: data.backgroundColor || defaultColors.bg,
-        borderColor: data.borderColor || defaultColors.border,
-      }}
-    >
-      <div className="h-full flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
-            {data.type.replace('-', ' ')}
-          </Badge>
-          <div className="flex gap-2 items-center">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Settings2 className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-60 flex flex-col gap-4 bg-white/80 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <Label>Background</Label>
-                  <ColorPicker
-                    value={data.backgroundColor || defaultColors.bg}
-                    onChange={(color) => updateNodeColor('backgroundColor', color)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Border</Label>
-                  <ColorPicker
-                    value={data.borderColor || defaultColors.border}
-                    onChange={(color) => updateNodeColor('borderColor', color)}
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive/90"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+    <>
+      <NodeResizer 
+        minWidth={350}
+        minHeight={250}
+        isVisible={true}
+        lineClassName="border-primary"
+        handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full"
+      />
+      <Card 
+        ref={nodeRef}
+        className={cn(
+          "min-w-[350px] min-h-[250px] p-6",
+          "bg-white/40 dark:bg-white/40",
+          "backdrop-blur-xl border-2",
+          "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
+          "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
+          "transition-shadow duration-200"
+        )}
+        style={{
+          backgroundColor: data.backgroundColor || defaultColors.bg,
+          borderColor: data.borderColor || defaultColors.border,
+        }}
+      >
+        <div className="h-full flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
+              {data.type.replace('-', ' ')}
+            </Badge>
+            <div className="flex gap-2 items-center">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Settings2 className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-60 flex flex-col gap-4 bg-white/80 backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <Label>Background</Label>
+                    <ColorPicker
+                      value={data.backgroundColor || defaultColors.bg}
+                      onChange={(color) => updateNodeColor('backgroundColor', color)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Border</Label>
+                    <ColorPicker
+                      value={data.borderColor || defaultColors.border}
+                      onChange={(color) => updateNodeColor('borderColor', color)}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive/90"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
+          {isEditing ? (
+            <Input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="text-lg font-medium bg-white/50 backdrop-blur-sm text-gray-800"
+              placeholder="Enter note title..."
+            />
+          ) : (
+            <div
+              onDoubleClick={handleDoubleClick}
+              className="text-lg font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
+            >
+              {label || 'Double click to edit'}
+            </div>
+          )}
+
+          <NoteEditor content={data.content || ''} onChange={handleContentChange} />
         </div>
 
-        {isEditing ? (
-          <Input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            className="text-lg font-medium bg-white/50 backdrop-blur-sm text-gray-800"
-            placeholder="Enter note title..."
-          />
-        ) : (
-          <div
-            onDoubleClick={handleDoubleClick}
-            className="text-lg font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
-          >
-            {label || 'Double click to edit'}
-          </div>
-        )}
-
-        <NoteEditor content={data.content || ''} onChange={handleContentChange} />
-      </div>
-
-      <div className="absolute inset-0 pointer-events-none">
-        {['top', 'right', 'bottom', 'left'].map((position) => (
-          <Handle
-            key={position}
-            type="source"
-            position={position as Position}
-            className={cn(
-              "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-              "!bg-primary/50 hover:!bg-primary",
-              "w-3 h-3 rounded-full border-2 border-white"
-            )}
-            id={`${position}-${id}`}
-            isConnectable={isConnectable}
-          />
-        ))}
-      </div>
-    </Card>
+        <div className="absolute inset-0 pointer-events-none">
+          {['top', 'right', 'bottom', 'left'].map((position) => (
+            <Handle
+              key={position}
+              type="source"
+              position={position as Position}
+              className={cn(
+                "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                "!bg-primary/50 hover:!bg-primary",
+                "w-3 h-3 rounded-full border-2 border-white"
+              )}
+              id={`${position}-${id}`}
+              isConnectable={isConnectable}
+            />
+          ))}
+        </div>
+      </Card>
+    </>
   );
 };
 
