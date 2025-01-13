@@ -14,6 +14,7 @@ import {
   GetMiniMapNodeAttribute,
   BaseEdge,
   EdgeProps,
+  getBezierPath,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -157,18 +158,30 @@ const Index = () => {
         onDragOver={onDragOver}
         onDrop={onDrop}
         edgeTypes={{
-          default: (props: EdgeProps) => (
-            <EdgeContextMenu edge={props}>
-              <BaseEdge 
-                {...props}
-                style={{
-                  ...props.style,
-                  strokeWidth: 2,
-                  stroke: props.style?.stroke || 'hsl(var(--primary))',
-                }}
-              />
-            </EdgeContextMenu>
-          ),
+          default: (props: EdgeProps) => {
+            const [edgePath] = getBezierPath({
+              sourceX: props.sourceX,
+              sourceY: props.sourceY,
+              sourcePosition: props.sourcePosition,
+              targetX: props.targetX,
+              targetY: props.targetY,
+              targetPosition: props.targetPosition,
+            });
+
+            return (
+              <EdgeContextMenu edge={props}>
+                <BaseEdge 
+                  path={edgePath}
+                  {...props}
+                  style={{
+                    ...props.style,
+                    strokeWidth: 2,
+                    stroke: props.style?.stroke || 'hsl(var(--primary))',
+                  }}
+                />
+              </EdgeContextMenu>
+            );
+          },
         }}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
