@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { useReactFlow, Edge } from '@xyflow/react';
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { useState } from "react";
 
 const defaultEdgeStyle = {
