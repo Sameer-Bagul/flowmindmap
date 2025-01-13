@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useState } from "react";
 
 const defaultEdgeStyle = {
   stroke: '#3b82f6',
@@ -17,131 +18,115 @@ const defaultEdgeStyle = {
 };
 
 export const EdgeControls = () => {
-  const { setEdges, getEdges, getNodes } = useReactFlow();
+  const { setEdges, getEdges } = useReactFlow();
+  const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+  const edges = getEdges();
 
   const updateEdgeStyle = (style: string) => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        type: style,
-        style: edge.style || defaultEdgeStyle,
+        type: edge.id === selectedEdge ? style : edge.type,
+        style: edge.id === selectedEdge ? edge.style || defaultEdgeStyle : edge.style,
       }))
     );
-    toast.success(`Edge style updated to ${style}`);
+    toast.success(`Edge style updated`);
   };
 
   const toggleEdgeAnimation = () => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        animated: !edge.animated,
+        animated: edge.id === selectedEdge ? !edge.animated : edge.animated,
       }))
     );
-    const isAnimated = !getEdges()[0]?.animated;
+    const edge = edges.find(e => e.id === selectedEdge);
+    const isAnimated = !edge?.animated;
     toast.success(`Edge animation ${isAnimated ? 'enabled' : 'disabled'}`);
   };
 
   const updateEdgeColor = (color: string) => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        style: { 
+        style: edge.id === selectedEdge ? { 
           ...edge.style, 
           stroke: color,
           strokeWidth: edge.style?.strokeWidth || 2
-        },
+        } : edge.style,
       }))
     );
     toast.success('Edge color updated');
   };
 
+  const deleteSelectedEdge = () => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
+    setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge));
+    setSelectedEdge(null);
+    toast.success('Edge deleted');
+  };
+
   const updateEdgeWidth = (width: number) => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        style: { ...edge.style, strokeWidth: width }
+        style: edge.id === selectedEdge ? { ...edge.style, strokeWidth: width } : edge.style,
       }))
     );
     toast.success('Edge width updated');
   };
 
   const updateEdgeOpacity = (opacity: number) => {
+    if (!selectedEdge) {
+      toast.error('Please select an edge first');
+      return;
+    }
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        style: { ...edge.style, opacity }
+        style: edge.id === selectedEdge ? { ...edge.style, opacity } : edge.style,
       }))
     );
     toast.success('Edge opacity updated');
   };
 
-  const updateEdgeLabel = (label: string) => {
-    setEdges((eds) =>
-      eds.map((edge) => ({
-        ...edge,
-        label
-      }))
-    );
-    toast.success('Edge label updated');
-  };
-
-  const resetEdgeStyles = () => {
-    setEdges((eds) =>
-      eds.map((edge) => ({
-        ...edge,
-        style: defaultEdgeStyle,
-        animated: false,
-        label: ''
-      }))
-    );
-    toast.success('Edge styles reset to default');
-  };
-
-  const downloadPDF = async () => {
-    const element = document.querySelector('.react-flow__viewport') as HTMLElement;
-    if (!element) {
-      toast.error('Could not find flow element');
-      return;
-    }
-
-    try {
-      const nodes = getNodes();
-      const bounds = nodes.reduce(
-        (acc, node) => ({
-          minX: Math.min(acc.minX, node.position.x),
-          minY: Math.min(acc.minY, node.position.y),
-          maxX: Math.max(acc.maxX, node.position.x + (node.width || 0)),
-          maxY: Math.max(acc.maxY, node.position.y + (node.height || 0)),
-        }),
-        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-      );
-
-      element.style.width = `${bounds.maxX - bounds.minX + 100}px`;
-      element.style.height = `${bounds.maxY - bounds.minY + 100}px`;
-
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('mindmap.pdf');
-      toast.success('Flow exported as PDF');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to export PDF');
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 p-4 bg-background/60 backdrop-blur-sm rounded-lg border shadow-sm">
+      <div className="space-y-2">
+        <Label>Select Edge</Label>
+        <Select value={selectedEdge || ''} onValueChange={setSelectedEdge}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select an edge" />
+          </SelectTrigger>
+          <SelectContent>
+            {edges.map((edge) => (
+              <SelectItem key={edge.id} value={edge.id}>
+                Edge {edge.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <Label>Edge Style</Label>
         <Select onValueChange={updateEdgeStyle} defaultValue="smoothstep">
@@ -160,7 +145,7 @@ export const EdgeControls = () => {
       <div className="flex items-center justify-between gap-4">
         <Label>Edge Color</Label>
         <ColorPicker
-          value={getEdges()[0]?.style?.stroke || '#3b82f6'}
+          value={edges.find(e => e.id === selectedEdge)?.style?.stroke || '#3b82f6'}
           onChange={updateEdgeColor}
         />
       </div>
@@ -187,25 +172,17 @@ export const EdgeControls = () => {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Edge Label</Label>
-        <Input
-          placeholder="Enter edge label"
-          onChange={(e) => updateEdgeLabel(e.target.value)}
-        />
-      </div>
-
       <div className="flex items-center justify-between">
-        <Label>Animate Edges</Label>
+        <Label>Animate Edge</Label>
         <Switch onCheckedChange={toggleEdgeAnimation} />
       </div>
 
-      <Button onClick={resetEdgeStyles} variant="secondary" className="w-full">
-        Reset Edge Styles
-      </Button>
-
-      <Button onClick={downloadPDF} variant="secondary" className="w-full">
-        Download as PDF
+      <Button 
+        onClick={deleteSelectedEdge} 
+        variant="destructive"
+        className="w-full"
+      >
+        Delete Edge
       </Button>
     </div>
   );
