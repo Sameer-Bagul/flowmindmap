@@ -6,10 +6,12 @@ import { Image, Link, Video, Type } from 'lucide-react';
 import { NoteEditor } from '../NoteEditor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { TextNodeData } from '../TextNode';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
+  const [mediaUrl, setMediaUrl] = useState('');
   const { setNodes } = useReactFlow();
 
   const handleDoubleClick = useCallback(() => {
@@ -63,23 +65,34 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
     );
   }, [id, setNodes]);
 
-  const handleMediaAdd = useCallback((type: 'image' | 'video' | 'link', url: string) => {
+  const addMedia = useCallback((type: 'image' | 'video' | 'youtube' | 'link') => {
+    if (!mediaUrl) return;
+
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
+          const media = node.data.media || [];
           return {
             ...node,
             data: {
               ...node.data,
-              mediaUrl: url,
-              mediaType: type
+              media: [...media, { type, url: mediaUrl }]
             }
           };
         }
         return node;
       })
     );
-  }, [id, setNodes]);
+    setMediaUrl('');
+  }, [id, mediaUrl, setNodes]);
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11
+      ? `https://www.youtube.com/embed/${match[2]}`
+      : url;
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,83 +116,61 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
         </div>
       )}
 
-      <div className="flex gap-2 p-2 bg-white/50 backdrop-blur-sm rounded-lg">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Image className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Image URL</DialogTitle>
-            </DialogHeader>
-            <Input 
-              placeholder="Enter image URL..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleMediaAdd('image', e.currentTarget.value);
-                }
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Video className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Video URL</DialogTitle>
-            </DialogHeader>
-            <Input 
-              placeholder="Enter video URL..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleMediaAdd('video', e.currentTarget.value);
-                }
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Link className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Link URL</DialogTitle>
-            </DialogHeader>
-            <Input 
-              placeholder="Enter link URL..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleMediaAdd('link', e.currentTarget.value);
-                }
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+      <div className="flex gap-2 items-center">
+        <Input
+          type="text"
+          value={mediaUrl}
+          onChange={(e) => setMediaUrl(e.target.value)}
+          placeholder="Enter media URL..."
+          className="flex-1"
+        />
+        <Button variant="ghost" size="icon" onClick={() => addMedia('image')}>
+          <Image className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => addMedia('video')}>
+          <Video className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => addMedia('youtube')}>
+          <Video className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => addMedia('link')}>
+          <Link className="h-4 w-4" />
+        </Button>
       </div>
 
-      {data.mediaUrl && (
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black/5">
-          {data.mediaType === 'image' && (
-            <img src={data.mediaUrl} alt={label} className="w-full h-full object-contain" />
-          )}
-          {data.mediaType === 'video' && (
-            <video src={data.mediaUrl} controls className="w-full h-full" />
-          )}
-          {data.mediaType === 'link' && (
-            <iframe src={data.mediaUrl} className="w-full h-full" />
-          )}
-        </div>
+      {data.media && data.media.length > 0 && (
+        <ScrollArea className="w-full max-h-[200px]">
+          <div className="flex flex-col gap-4">
+            {data.media.map((item, index) => (
+              <div key={index} className="relative">
+                {item.type === 'image' && (
+                  <img src={item.url} alt={item.title || 'Image'} className="w-full rounded-lg" />
+                )}
+                {item.type === 'video' && (
+                  <video src={item.url} controls className="w-full rounded-lg" />
+                )}
+                {item.type === 'youtube' && (
+                  <iframe
+                    src={getYouTubeEmbedUrl(item.url)}
+                    className="w-full aspect-video rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )}
+                {item.type === 'link' && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline break-all"
+                  >
+                    {item.title || item.url}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       )}
 
       <NoteEditor content={data.content || ''} onChange={handleContentChange} />
