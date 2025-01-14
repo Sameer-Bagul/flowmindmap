@@ -28,6 +28,8 @@ export interface TextNodeData {
   type: NoteType;
   backgroundColor?: string;
   borderColor?: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video' | 'link';
   handles?: HandleData[];
 }
 

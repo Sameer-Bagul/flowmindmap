@@ -27,7 +27,7 @@ const SubTopicNode = ({ id, data }: { id: string; data: TextNodeData }) => {
       >
         <div className="h-full flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <Badge variant="default" className="capitalize backdrop-blur-sm">
+            <Badge variant="secondary" className="capitalize backdrop-blur-sm bg-green-500/20 text-green-700">
               Sub Topic
             </Badge>
             <NodeControls id={id} data={data} />

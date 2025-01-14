@@ -27,7 +27,7 @@ const MainTopicNode = ({ id, data }: { id: string; data: TextNodeData }) => {
       >
         <div className="h-full flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="capitalize backdrop-blur-sm">
+            <Badge variant="secondary" className="capitalize backdrop-blur-sm bg-blue-500/20 text-blue-700">
               Main Topic
             </Badge>
             <NodeControls id={id} data={data} />
