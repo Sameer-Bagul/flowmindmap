@@ -82,11 +82,6 @@ export function EdgeContextMenu({ children, edge }: EdgeContextMenuProps) {
     toast.success('Edge opacity updated');
   }, [edge.id, setEdges]);
 
-  const deleteEdge = useCallback(() => {
-    setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-    toast.success('Edge deleted');
-  }, [edge.id, setEdges]);
-
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -148,10 +143,6 @@ export function EdgeContextMenu({ children, edge }: EdgeContextMenuProps) {
               onCheckedChange={toggleEdgeAnimation}
             />
           </div>
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem className="text-red-600" onClick={deleteEdge}>
-          Delete Edge
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

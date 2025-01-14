@@ -63,9 +63,9 @@ const Index = () => {
         style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
       };
       setEdges((eds) => {
-        const updatedEdges = addEdge(newEdge, eds);
-        setElements(nodes, updatedEdges);
-        return updatedEdges;
+        const update = addEdge(newEdge, eds);
+        setElements(nodes, update);
+        return update;
       });
       toast.success('Nodes connected successfully');
     },
@@ -101,9 +101,9 @@ const Index = () => {
       };
 
       setNodes((nds) => {
-        const newNodes = [...nds, newNode];
-        setElements(newNodes, edges);
-        return newNodes;
+        const update = [...nds, newNode];
+        setElements(update, edges);
+        return update;
       });
       toast.success(`Added new ${type.replace('-', ' ')}`);
     },
@@ -138,7 +138,7 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
-      toast.success('Flow auto-saved');
+      toast.success('Flow auto-saved', { id: 'auto-save' });
     }, 30000);
 
     return () => clearInterval(interval);
@@ -189,12 +189,8 @@ const Index = () => {
               <EdgeContextMenu edge={props}>
                 <BaseEdge 
                   path={edgePath}
-                  {...props}
-                  style={{
-                    ...props.style,
-                    strokeWidth: 2,
-                    stroke: props.style?.stroke || 'hsl(var(--primary))',
-                  }}
+                  markerEnd={props.markerEnd}
+                  style={props.style}
                 />
               </EdgeContextMenu>
             );

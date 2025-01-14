@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
+import { Label } from '@/components/ui/label';
 import { Switch } from "@/components/ui/switch";
 
 const languages = [
@@ -33,7 +33,6 @@ const languages = [
 
 const themes = [
   'vs-dark',
-  'light',
   'hc-black',
   'hc-light'
 ];
@@ -49,7 +48,7 @@ interface CodeNodeData {
   lineNumbers?: boolean;
 }
 
-const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData; isConnectable?: boolean }) => {
+const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
   const [code, setCode] = useState(data.code || '// Write your code here');
   const [language, setLanguage] = useState(data.language || 'typescript');
   const [theme, setTheme] = useState(data.theme || 'vs-dark');
@@ -253,7 +252,6 @@ const CodeNode = ({ id, data, isConnectable }: { id: string, data: CodeNodeData;
                 "w-3 h-3 rounded-full border-2 border-white"
               )}
               id={`${position}-${id}`}
-              isConnectable={isConnectable}
             />
           ))}
         </div>
