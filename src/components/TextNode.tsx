@@ -172,7 +172,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
-          const media = [...(node.data.media || [])];
+          const media = [...(node.data.media as MediaItem[] || [])];
           media.splice(index, 1);
           return {
             ...node,
