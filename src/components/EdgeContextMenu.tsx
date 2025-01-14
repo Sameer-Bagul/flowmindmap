@@ -10,6 +10,9 @@ import {
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface EdgeContextMenuProps {
   edge: Edge;
@@ -53,6 +56,32 @@ export function EdgeContextMenu({ children, edge }: EdgeContextMenuProps) {
     toast.success('Edge color updated');
   }, [edge.id, setEdges]);
 
+  const updateEdgeWidth = useCallback((width: number[]) => {
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: e.id === edge.id ? { 
+          ...e.style, 
+          strokeWidth: width[0]
+        } : e.style,
+      }))
+    );
+    toast.success('Edge width updated');
+  }, [edge.id, setEdges]);
+
+  const updateEdgeOpacity = useCallback((opacity: number[]) => {
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: e.id === edge.id ? { 
+          ...e.style, 
+          opacity: opacity[0]
+        } : e.style,
+      }))
+    );
+    toast.success('Edge opacity updated');
+  }, [edge.id, setEdges]);
+
   const deleteEdge = useCallback(() => {
     setEdges((eds) => eds.filter((e) => e.id !== edge.id));
     toast.success('Edge deleted');
@@ -87,8 +116,38 @@ export function EdgeContextMenu({ children, edge }: EdgeContextMenuProps) {
             />
           </div>
         </ContextMenuItem>
-        <ContextMenuItem onClick={toggleEdgeAnimation}>
-          Toggle Animation
+        <ContextMenuItem>
+          <div className="flex flex-col gap-2 w-full">
+            <Label>Edge Width</Label>
+            <Slider
+              defaultValue={[edge.style?.strokeWidth as number || 2]}
+              max={10}
+              min={1}
+              step={1}
+              onValueChange={updateEdgeWidth}
+            />
+          </div>
+        </ContextMenuItem>
+        <ContextMenuItem>
+          <div className="flex flex-col gap-2 w-full">
+            <Label>Edge Opacity</Label>
+            <Slider
+              defaultValue={[edge.style?.opacity as number || 1]}
+              max={1}
+              min={0.1}
+              step={0.1}
+              onValueChange={updateEdgeOpacity}
+            />
+          </div>
+        </ContextMenuItem>
+        <ContextMenuItem>
+          <div className="flex items-center justify-between w-full">
+            <Label>Animate Edge</Label>
+            <Switch
+              checked={edge.animated}
+              onCheckedChange={toggleEdgeAnimation}
+            />
+          </div>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem className="text-red-600" onClick={deleteEdge}>
