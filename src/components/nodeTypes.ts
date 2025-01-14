@@ -1,14 +1,14 @@
 import ChapterNode from './nodes/ChapterNode';
 import MainTopicNode from './nodes/MainTopicNode';
 import SubTopicNode from './nodes/SubTopicNode';
-import CodeNode from './nodes/CodeNode';
+import CodeNode from './CodeNode';
 import { NodeTypes } from '@xyflow/react';
 
 const nodeTypes: NodeTypes = {
-  chapter: ChapterNode,
+  'chapter': ChapterNode,
   'main-topic': MainTopicNode,
   'sub-topic': SubTopicNode,
-  code: CodeNode,
+  'code': CodeNode,
 };
 
 export default nodeTypes;

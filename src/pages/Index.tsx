@@ -28,8 +28,6 @@ import { FlowToolbar } from '@/components/FlowToolbar';
 import { EdgeContextMenu } from '@/components/EdgeContextMenu';
 import type { Edge } from '@xyflow/react';
 
-type NoteType = 'text-note' | 'task-note' | 'idea-note';
-
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
@@ -46,6 +44,16 @@ const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements, undo, redo } = useFlowStore();
+
+  // Load saved flow on mount
+  useEffect(() => {
+    const savedFlow = localStorage.getItem('flow');
+    if (savedFlow) {
+      const { nodes: savedNodes, edges: savedEdges } = JSON.parse(savedFlow);
+      setNodes(savedNodes);
+      setEdges(savedEdges);
+    }
+  }, [setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -73,7 +81,7 @@ const Index = () => {
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
 
-      const type = event.dataTransfer.getData('application/reactflow') as NoteType;
+      const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
@@ -83,8 +91,8 @@ const Index = () => {
       };
 
       const newNode = {
-        id: `${nodes.length + 1}`,
-        type: 'textNode',
+        id: `${type}-${nodes.length + 1}`,
+        type,
         position,
         data: { 
           label: `New ${type.replace('-', ' ')}`,
@@ -137,7 +145,16 @@ const Index = () => {
   }, [nodes, edges]);
 
   const getNodeColor: GetMiniMapNodeAttribute<Node> = (node) => {
-    return (node.data?.backgroundColor as string) || '#fff';
+    switch (node.type) {
+      case 'chapter':
+        return 'rgba(254, 243, 199, 0.7)';
+      case 'main-topic':
+        return 'rgba(219, 234, 254, 0.7)';
+      case 'sub-topic':
+        return 'rgba(220, 252, 231, 0.7)';
+      default:
+        return '#fff';
+    }
   };
 
   return (
