@@ -23,7 +23,7 @@ interface HandleData {
   y: number;
 }
 
-interface MediaItem {
+export interface MediaItem {
   type: 'image' | 'video' | 'youtube' | 'link';
   url: string;
   title?: string;
@@ -203,9 +203,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         "min-w-[350px] min-h-[250px] p-6",
         "bg-white/80 dark:bg-white/80",
         "backdrop-blur-xl border-2",
-        "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
-        "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
-        "transition-shadow duration-200"
+        "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
       )}
       style={{
         backgroundColor: data.backgroundColor || defaultColors.bg,
