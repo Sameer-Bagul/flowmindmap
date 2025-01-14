@@ -27,7 +27,7 @@ const ChapterNode = ({ id, data }: { id: string; data: TextNodeData }) => {
       >
         <div className="h-full flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <Badge variant="warning" className="capitalize backdrop-blur-sm">
+            <Badge variant="secondary" className="capitalize backdrop-blur-sm">
               Chapter
             </Badge>
             <NodeControls id={id} data={data} />
