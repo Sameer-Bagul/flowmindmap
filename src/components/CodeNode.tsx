@@ -97,10 +97,9 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
     try {
       // eslint-disable-next-line no-new-func
       const result = new Function(code)();
-      console.log('Code execution result:', result);
+      const output = JSON.stringify(result, null, 2);
       toast.success('Code executed successfully');
     } catch (error) {
-      console.error('Code execution error:', error);
       toast.error('Code execution failed');
     }
   }, [code]);
@@ -226,7 +225,10 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
                 lineNumbersMinChars: 3,
                 suggestOnTriggerCharacters: true,
                 quickSuggestions: true,
-                bracketPairColorization: true,
+                bracketPairColorization: {
+                  enabled: true,
+                  independentColorPoolPerBracketType: true
+                }
               }}
             />
           </div>
