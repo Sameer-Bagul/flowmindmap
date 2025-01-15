@@ -20,7 +20,7 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
-          const media = node.data.media || [];
+          const media = Array.isArray(node.data.media) ? node.data.media : [];
           return {
             ...node,
             data: {

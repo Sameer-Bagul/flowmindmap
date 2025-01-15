@@ -296,7 +296,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
           <NoteEditor content={data.content || ''} onChange={handleContentChange} />
         </div>
 
-        {data.media && data.media.length > 0 && (
+        {data.media && Array.isArray(data.media) && data.media.length > 0 && (
           <ScrollArea className="w-[200px] border-l pl-4">
             <div className="flex flex-col gap-4">
               {data.media.map((item, index) => (

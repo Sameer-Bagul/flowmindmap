@@ -109,12 +109,30 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
             onDelete={() => setShowDeleteDialog(true)}
           />
 
-          <CodeNodeEditor
-            code={code}
-            language={language}
-            theme={theme}
-            onChange={(value) => setCode(value || '')}
-          />
+          <div className="flex-1 min-h-[300px] rounded-md overflow-hidden border border-primary/20">
+            <Editor
+              height="100%"
+              defaultLanguage={language}
+              language={language}
+              theme={theme}
+              value={code}
+              onChange={(value) => setCode(value || '')}
+              options={{
+                minimap: { enabled: true },
+                fontSize: 14,
+                wordWrap: 'on',
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                lineNumbers: 'on',
+                glyphMargin: true,
+                folding: true,
+                lineDecorationsWidth: 10,
+                lineNumbersMinChars: 3,
+                padding: { top: 20, bottom: 20 },
+                bracketPairColorization: { enabled: true, independentColorPoolPerBracketType: true }
+              }}
+            />
+          </div>
         </div>
 
         <input
