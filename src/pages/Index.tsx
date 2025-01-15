@@ -10,23 +10,18 @@ import {
   Connection,
   ConnectionMode,
   Panel,
-  GetMiniMapNodeAttribute,
-  BaseEdge,
-  EdgeProps,
-  getBezierPath,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { ColorPicker } from '@/components/ColorPicker';
 import nodeTypes from '../components/nodeTypes';
 import { toast } from "sonner";
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
-import { EdgeContextMenu } from '@/components/EdgeContextMenu';
-import { FlowActions } from '@/components/FlowActions';
-import type { Edge } from '@xyflow/react';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -44,6 +39,7 @@ const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
+  const { backgroundColor, setBackgroundColor } = useSettingsStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -100,7 +96,7 @@ const Index = () => {
     [nodes.length, setNodes, edges, setElements],
   );
 
-  const getNodeColor: GetMiniMapNodeAttribute = (node) => {
+  const getNodeColor = (node) => {
     switch (node.type) {
       case 'chapter':
         return 'rgba(254, 243, 199, 0.7)';
@@ -114,7 +110,7 @@ const Index = () => {
   };
 
   return (
-    <div className="w-screen h-screen bg-background">
+    <div className="w-screen h-screen" style={{ backgroundColor }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -125,38 +121,19 @@ const Index = () => {
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
         fitView
-        className="bg-muted/10 transition-colors duration-200"
+        className="bg-zinc-900/50 transition-colors duration-200"
         minZoom={0.2}
         maxZoom={4}
         onDragOver={onDragOver}
         onDrop={onDrop}
-        edgeTypes={{
-          default: (props: EdgeProps) => {
-            const [edgePath] = getBezierPath({
-              sourceX: props.sourceX,
-              sourceY: props.sourceY,
-              sourcePosition: props.sourcePosition,
-              targetX: props.targetX,
-              targetY: props.targetY,
-              targetPosition: props.targetPosition,
-            });
-
-            return (
-              <EdgeContextMenu edge={props}>
-                <BaseEdge 
-                  path={edgePath}
-                  markerEnd={props.markerEnd}
-                  style={props.style}
-                />
-              </EdgeContextMenu>
-            );
-          },
-        }}
       >
         <Panel position="top-left" className="flex flex-col gap-4">
           <FlowToolbar />
           <FlowControls />
-          <FlowActions />
+          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm p-2 rounded-md">
+            <span className="text-sm text-white">Background:</span>
+            <ColorPicker value={backgroundColor} onChange={setBackgroundColor} />
+          </div>
           <Link to="/shortcuts">
             <Button variant="outline" className="w-full">
               View Shortcuts
@@ -166,13 +143,9 @@ const Index = () => {
         <Panel position="top-right" className="flex gap-2">
           <ThemeToggle />
         </Panel>
-        <Controls className="bg-background/60 border shadow-sm" />
-        <MiniMap 
-          className="bg-background/60 border shadow-sm !bottom-5 !right-5"
-          nodeColor={getNodeColor}
-          maskColor="rgba(0, 0, 0, 0.1)"
-        />
-        <Background color="#ccc" gap={16} size={1} />
+        <Controls className="bg-zinc-900/80 border-zinc-700 shadow-sm" />
+        <MiniMap className="bg-zinc-900/80 border-zinc-700 shadow-sm" />
+        <Background color="#666" gap={16} size={1} />
       </ReactFlow>
     </div>
   );

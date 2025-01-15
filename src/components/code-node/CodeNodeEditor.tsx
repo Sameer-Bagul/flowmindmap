@@ -6,7 +6,6 @@ interface CodeNodeEditorProps {
   language: string;
   theme: string;
   onChange: (value: string | undefined) => void;
-  options?: Record<string, any>;
 }
 
 export const CodeNodeEditor = ({
@@ -14,12 +13,11 @@ export const CodeNodeEditor = ({
   language,
   theme,
   onChange,
-  options = {}
 }: CodeNodeEditorProps) => {
   const { theme: systemTheme } = useTheme();
   
   return (
-    <div className="flex-1 min-h-[200px] rounded-md overflow-hidden border border-border/50">
+    <div className="flex-1 min-h-[300px] rounded-md overflow-hidden border border-zinc-700/50 bg-zinc-900">
       <Editor
         height="100%"
         defaultLanguage={language}
@@ -38,11 +36,8 @@ export const CodeNodeEditor = ({
           folding: true,
           lineDecorationsWidth: 10,
           lineNumbersMinChars: 3,
-          bracketPairColorization: {
-            enabled: true,
-            independentColorPoolPerBracketType: true,
-          },
-          ...options
+          padding: { top: 20, bottom: 20 },
+          bracketPairColorization: { enabled: true },
         }}
       />
     </div>
