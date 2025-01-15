@@ -1,12 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
-import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react';
+import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Code2, Copy, Download, Upload, Play, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { CodeNodeHeader } from './CodeNodeHeader';
-import { CodeNodeEditor } from './CodeNodeEditor';
-import { CodeOutput } from './CodeOutput';
+import { Editor } from "@monaco-editor/react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { CodeNodeHeader } from './CodeNodeHeader';
+import { CodeOutput } from './CodeOutput';
 
 interface CodeNodeData {
   label: string;
@@ -23,7 +26,6 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
   const [showOutput, setShowOutput] = useState(false);
   const [output, setOutput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { deleteElements } = useReactFlow();
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code);
@@ -62,6 +64,7 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
 
   const handleRun = useCallback(() => {
     try {
+      // eslint-disable-next-line no-new-func
       const result = new Function(code)();
       const output = JSON.stringify(result, null, 2);
       setOutput(output);
@@ -73,11 +76,6 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
       toast.error('Code execution failed');
     }
   }, [code]);
-
-  const handleDelete = useCallback(() => {
-    deleteElements({ nodes: [{ id }] });
-    toast.success('Node deleted');
-  }, [deleteElements, id]);
 
   return (
     <>
@@ -129,7 +127,10 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
                 lineDecorationsWidth: 10,
                 lineNumbersMinChars: 3,
                 padding: { top: 20, bottom: 20 },
-                bracketPairColorization: { enabled: true, independentColorPoolPerBracketType: true }
+                bracketPairColorization: { 
+                  enabled: true, 
+                  independentColorPoolPerBracketType: true 
+                }
               }}
             />
           </div>
@@ -170,7 +171,7 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={() => {}} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
