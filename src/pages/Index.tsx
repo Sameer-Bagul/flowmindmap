@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -7,7 +7,6 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  Node,
   Connection,
   ConnectionMode,
   Panel,
@@ -26,10 +25,11 @@ import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { EdgeContextMenu } from '@/components/EdgeContextMenu';
+import { FlowActions } from '@/components/FlowActions';
 import type { Edge } from '@xyflow/react';
 
-const initialNodes: Node[] = [];
-const initialEdges: Edge[] = [];
+const initialNodes = [];
+const initialEdges = [];
 
 const defaultEdgeOptions = {
   type: 'smoothstep',
@@ -43,17 +43,7 @@ const defaultEdgeOptions = {
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setElements, undo, redo } = useFlowStore();
-
-  // Load saved flow on mount
-  useEffect(() => {
-    const savedFlow = localStorage.getItem('flow');
-    if (savedFlow) {
-      const { nodes: savedNodes, edges: savedEdges } = JSON.parse(savedFlow);
-      setNodes(savedNodes);
-      setEdges(savedEdges);
-    }
-  }, [setNodes, setEdges]);
+  const { setElements } = useFlowStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -110,41 +100,7 @@ const Index = () => {
     [nodes.length, setNodes, edges, setElements],
   );
 
-  useEffect(() => {
-    const handleKeyboard = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey) {
-        switch (event.key.toLowerCase()) {
-          case 'z':
-            event.preventDefault();
-            undo();
-            break;
-          case 'y':
-            event.preventDefault();
-            redo();
-            break;
-          case 's':
-            event.preventDefault();
-            localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
-            toast.success('Flow saved');
-            break;
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyboard);
-    return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [nodes, edges, undo, redo]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      localStorage.setItem('flow', JSON.stringify({ nodes, edges }));
-      toast.success('Flow auto-saved', { id: 'auto-save' });
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [nodes, edges]);
-
-  const getNodeColor: GetMiniMapNodeAttribute<Node> = (node) => {
+  const getNodeColor: GetMiniMapNodeAttribute = (node) => {
     switch (node.type) {
       case 'chapter':
         return 'rgba(254, 243, 199, 0.7)';
@@ -200,6 +156,7 @@ const Index = () => {
         <Panel position="top-left" className="flex flex-col gap-4">
           <FlowToolbar />
           <FlowControls />
+          <FlowActions />
           <Link to="/shortcuts">
             <Button variant="outline" className="w-full">
               View Shortcuts
