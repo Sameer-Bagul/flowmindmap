@@ -3,6 +3,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 
 const colors = [
+  "#FFFFFF", // Pure white
+  "#F8F9FA", // Slightly off-white
   "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff",
   "#ff8800", "#88ff00", "#0088ff", "#ff0088", "#8800ff", "#00ff88"
 ];
@@ -18,8 +20,11 @@ export const ColorPicker = ({ value = "#000000", onChange }: ColorPickerProps) =
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-8 h-8 p-0 rounded-md"
-          style={{ backgroundColor: value }}
+          className="w-8 h-8 p-0 rounded-md border-2"
+          style={{ 
+            backgroundColor: value,
+            borderColor: value === "#FFFFFF" ? "#e2e8f0" : value // Add border for white color
+          }}
         />
       </PopoverTrigger>
       <PopoverContent className="w-[8rem] p-2">
@@ -29,6 +34,7 @@ export const ColorPicker = ({ value = "#000000", onChange }: ColorPickerProps) =
               key={color}
               className={cn(
                 "w-6 h-6 rounded-md transition-all duration-200 hover:scale-105",
+                "border border-border",
                 value === color && "ring-2 ring-primary ring-offset-2"
               )}
               style={{ backgroundColor: color }}
