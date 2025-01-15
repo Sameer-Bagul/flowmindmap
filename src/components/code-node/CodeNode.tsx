@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { CodeNodeHeader } from './CodeNodeHeader';
 import { CodeNodeEditor } from './CodeNodeEditor';
+import { CodeOutput } from './CodeOutput';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface CodeNodeData {
@@ -19,6 +20,8 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
   const [language, setLanguage] = useState(data.language || 'typescript');
   const [theme, setTheme] = useState(data.theme || 'vs-dark');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showOutput, setShowOutput] = useState(false);
+  const [output, setOutput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { deleteElements } = useReactFlow();
 
@@ -59,12 +62,14 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
 
   const handleRun = useCallback(() => {
     try {
-      // eslint-disable-next-line no-new-func
       const result = new Function(code)();
-      console.log('Code execution result:', result);
+      const output = JSON.stringify(result, null, 2);
+      setOutput(output);
+      setShowOutput(true);
       toast.success('Code executed successfully');
     } catch (error) {
-      console.error('Code execution error:', error);
+      setOutput(String(error));
+      setShowOutput(true);
       toast.error('Code execution failed');
     }
   }, [code]);
@@ -86,9 +91,9 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
       <Card 
         className={cn(
           "min-w-[400px] min-h-[300px] p-4",
-          "bg-background/95 backdrop-blur-xl border-2",
+          "bg-background/80 backdrop-blur-xl border-2",
           "shadow-xl dark:shadow-primary/20",
-          "dark:bg-background/80 dark:border-primary/50"
+          "dark:bg-zinc-900/80 dark:border-primary/50"
         )}
       >
         <div className="flex flex-col h-full gap-2">
@@ -153,6 +158,12 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <CodeOutput 
+        isOpen={showOutput} 
+        onClose={() => setShowOutput(false)} 
+        output={output}
+      />
     </>
   );
 };

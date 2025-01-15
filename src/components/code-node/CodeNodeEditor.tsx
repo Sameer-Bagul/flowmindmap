@@ -17,7 +17,7 @@ export const CodeNodeEditor = ({
   const { theme: systemTheme } = useTheme();
   
   return (
-    <div className="flex-1 min-h-[300px] rounded-md overflow-hidden border border-zinc-700/50 bg-zinc-900">
+    <div className="flex-1 min-h-[300px] rounded-md overflow-hidden border border-primary/20">
       <Editor
         height="100%"
         defaultLanguage={language}
