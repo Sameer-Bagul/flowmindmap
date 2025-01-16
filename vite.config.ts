@@ -31,5 +31,8 @@ export default defineConfig(({ mode }) => ({
         'ace-builds/src-noconflict/ext-language_tools'
       ]
     }
+  },
+  worker: {
+    format: 'es'
   }
 }));

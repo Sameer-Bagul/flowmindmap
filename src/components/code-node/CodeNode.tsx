@@ -1,35 +1,31 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code2, Copy, Download, Play, Settings2, Trash2 } from "lucide-react";
+import { Code2, Copy, Download, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AceEditor from "react-ace";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Import Ace editor themes and modes
+// Import Ace editor modes and themes
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-typescript";
-import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/theme-monokai";
-import "ace-builds/src-noconflict/theme-tomorrow_night";
+import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
 
 const languages = [
   'javascript',
   'python',
-  'java',
   'typescript'
 ];
 
 const themes = [
-  'github',
   'monokai',
-  'tomorrow_night'
+  'github'
 ];
 
 interface CodeNodeData {
@@ -42,7 +38,7 @@ interface CodeNodeData {
 const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDelete?: (id: string) => void }) => {
   const [code, setCode] = useState(data.code || '// Write your code here');
   const [language, setLanguage] = useState(data.language || 'javascript');
-  const [theme, setTheme] = useState(data.theme || 'github');
+  const [theme, setTheme] = useState(data.theme || 'monokai');
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
 
@@ -66,23 +62,22 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
 
   const handleRun = useCallback(() => {
     try {
-      // eslint-disable-next-line no-new-func
-      const result = new Function(code)();
-      const output = JSON.stringify(result, null, 2);
-      setOutput(output);
-      setShowOutput(true);
-      toast.success('Code executed successfully');
+      // For JavaScript code execution
+      if (language === 'javascript') {
+        // eslint-disable-next-line no-new-func
+        const result = new Function(code)();
+        setOutput(String(result));
+        setShowOutput(true);
+        toast.success('Code executed successfully');
+      } else {
+        toast.error('Only JavaScript execution is supported at the moment');
+      }
     } catch (error) {
       setOutput(String(error));
       setShowOutput(true);
       toast.error('Code execution failed');
     }
-  }, [code]);
-
-  const handleDelete = useCallback(() => {
-    onDelete?.(id);
-    toast.success('Node deleted');
-  }, [id, onDelete]);
+  }, [code, language]);
 
   return (
     <>
@@ -140,9 +135,6 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRun}>
                 <Play className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 
@@ -170,8 +162,8 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
           </div>
 
           {showOutput && (
-            <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
-              <pre className="text-sm overflow-x-auto">{output}</pre>
+            <div className="mt-2 p-2 bg-muted rounded-md">
+              <pre className="text-sm whitespace-pre-wrap">{output}</pre>
             </div>
           )}
         </div>
@@ -183,7 +175,6 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
               type="source"
               position={position as Position}
               className={cn(
-                "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
                 "!bg-violet-500/50 hover:!bg-violet-500",
                 "w-3 h-3 rounded-full border-2 border-white"
               )}
