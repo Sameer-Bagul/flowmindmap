@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 
 interface SettingsState {
-  backgroundColor: string;
-  setBackgroundColor: (color: string) => void;
+  // Background color feature removed, only theme handling remains
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
-  backgroundColor: '#1e1e1e', // Default dark background
-  setBackgroundColor: (color) => set({ backgroundColor: color }),
+  theme: 'light',
+  setTheme: (theme) => set({ theme }),
 }));

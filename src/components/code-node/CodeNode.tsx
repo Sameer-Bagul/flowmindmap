@@ -3,38 +3,33 @@ import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code2, Copy, Download, Upload, Play, Settings2 } from "lucide-react";
+import { Code2, Copy, Download, Play, Settings2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Editor } from "@monaco-editor/react";
+import AceEditor from "react-ace";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from '@/components/ui/label';
-import { Switch } from "@/components/ui/switch";
+
+// Import Ace editor themes and modes
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/mode-java";
+import "ace-builds/src-noconflict/mode-typescript";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-tomorrow_night";
+import "ace-builds/src-noconflict/ext-language_tools";
 
 const languages = [
   'javascript',
-  'typescript',
   'python',
   'java',
-  'cpp',
-  'csharp',
-  'go',
-  'rust',
-  'php',
-  'ruby',
-  'html',
-  'css',
-  'json',
-  'markdown',
-  'yaml',
-  'sql'
+  'typescript'
 ];
 
 const themes = [
-  'vs-dark',
-  'hc-black',
-  'hc-light'
+  'github',
+  'monokai',
+  'tomorrow_night'
 ];
 
 interface CodeNodeData {
@@ -42,21 +37,14 @@ interface CodeNodeData {
   code: string;
   language: string;
   theme: string;
-  fontSize?: number;
-  wordWrap?: boolean;
-  minimap?: boolean;
-  lineNumbers?: boolean;
 }
 
-const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
+const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDelete?: (id: string) => void }) => {
   const [code, setCode] = useState(data.code || '// Write your code here');
-  const [language, setLanguage] = useState(data.language || 'typescript');
-  const [theme, setTheme] = useState(data.theme || 'vs-dark');
-  const [fontSize, setFontSize] = useState(data.fontSize || 14);
-  const [wordWrap, setWordWrap] = useState(data.wordWrap ?? true);
-  const [minimap, setMinimap] = useState(data.minimap ?? true);
-  const [lineNumbers, setLineNumbers] = useState(data.lineNumbers ?? true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [language, setLanguage] = useState(data.language || 'javascript');
+  const [theme, setTheme] = useState(data.theme || 'github');
+  const [output, setOutput] = useState('');
+  const [showOutput, setShowOutput] = useState(false);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code);
@@ -76,33 +64,25 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
     toast.success('Code downloaded');
   }, [code, language]);
 
-  const handleUpload = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setCode(content);
-        toast.success('Code uploaded');
-      };
-      reader.readAsText(file);
-    }
-  }, []);
-
   const handleRun = useCallback(() => {
     try {
       // eslint-disable-next-line no-new-func
       const result = new Function(code)();
       const output = JSON.stringify(result, null, 2);
+      setOutput(output);
+      setShowOutput(true);
       toast.success('Code executed successfully');
     } catch (error) {
+      setOutput(String(error));
+      setShowOutput(true);
       toast.error('Code execution failed');
     }
   }, [code]);
+
+  const handleDelete = useCallback(() => {
+    onDelete?.(id);
+    toast.success('Node deleted');
+  }, [id, onDelete]);
 
   return (
     <>
@@ -151,96 +131,50 @@ const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
                   ))}
                 </SelectContent>
               </Select>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Settings2 className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <Label>Font Size</Label>
-                      <Select value={fontSize.toString()} onValueChange={(v) => setFontSize(Number(v))}>
-                        <SelectTrigger className="w-[80px]">
-                          <SelectValue placeholder="Size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[12, 14, 16, 18, 20].map(size => (
-                            <SelectItem key={size} value={size.toString()}>
-                              {size}px
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Word Wrap</Label>
-                      <Switch checked={wordWrap} onCheckedChange={setWordWrap} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Minimap</Label>
-                      <Switch checked={minimap} onCheckedChange={setMinimap} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Line Numbers</Label>
-                      <Switch checked={lineNumbers} onCheckedChange={setLineNumbers} />
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
                 <Copy className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload}>
                 <Download className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUpload}>
-                <Upload className="h-4 w-4" />
-              </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRun}>
                 <Play className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
           <div className="flex-1 min-h-[200px] rounded-md overflow-hidden border">
-            <Editor
-              height="100%"
-              defaultLanguage={language}
-              language={language}
+            <AceEditor
+              mode={language}
               theme={theme}
               value={code}
-              onChange={(value) => setCode(value || '')}
-              options={{
-                minimap: { enabled: minimap },
-                fontSize: fontSize,
-                wordWrap: wordWrap ? 'on' : 'off',
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                lineNumbers: lineNumbers ? 'on' : 'off',
-                glyphMargin: true,
-                folding: true,
-                lineDecorationsWidth: 10,
-                lineNumbersMinChars: 3,
-                suggestOnTriggerCharacters: true,
-                quickSuggestions: true,
-                bracketPairColorization: {
-                  enabled: true,
-                  independentColorPoolPerBracketType: true
-                }
+              onChange={setCode}
+              name={`editor-${id}`}
+              width="100%"
+              height="100%"
+              fontSize={14}
+              showPrintMargin={false}
+              showGutter={true}
+              highlightActiveLine={true}
+              setOptions={{
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true,
+                enableSnippets: true,
+                showLineNumbers: true,
+                tabSize: 2,
               }}
             />
           </div>
-        </div>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-          accept=".js,.ts,.py,.java,.cpp,.cs,.go,.rs,.php,.rb,.txt"
-        />
+          {showOutput && (
+            <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+              <pre className="text-sm overflow-x-auto">{output}</pre>
+            </div>
+          )}
+        </div>
 
         <div className="absolute inset-0 pointer-events-none">
           {['top', 'right', 'bottom', 'left'].map((position) => (
