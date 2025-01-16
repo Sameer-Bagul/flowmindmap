@@ -105,7 +105,7 @@ const Index = () => {
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
         fitView
-        className="bg-zinc-900/50 transition-colors duration-200"
+        className="bg-background transition-colors duration-200"
         minZoom={0.2}
         maxZoom={4}
         onDragOver={onDragOver}
@@ -123,8 +123,8 @@ const Index = () => {
         <Panel position="top-right" className="flex gap-2">
           <ThemeToggle />
         </Panel>
-        <Controls className="bg-zinc-900/80 border-zinc-700 shadow-sm" />
-        <MiniMap className="bg-zinc-900/80 border-zinc-700 shadow-sm" />
+        <Controls className="bg-background/80 border-border shadow-sm" />
+        <MiniMap className="bg-background/80 border-border shadow-sm" />
         <Background color="#666" gap={16} size={1} />
       </ReactFlow>
     </div>
