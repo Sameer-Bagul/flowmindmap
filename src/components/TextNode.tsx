@@ -14,6 +14,10 @@ import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
+export type MediaItem = {
+  type: 'image' | 'video' | 'youtube' | 'link';
+  url: string;
+};
 
 interface HandleData {
   id: string;
@@ -237,3 +241,4 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
 };
 
 export default TextNode;
+
