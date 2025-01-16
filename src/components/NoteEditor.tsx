@@ -13,8 +13,11 @@ interface NoteEditorProps {
 export const NoteEditor = ({ content, onChange }: NoteEditorProps) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
       CodeBlockLowlight.configure({
+        lowlight,
         HTMLAttributes: {
           class: 'bg-muted/50 rounded-md p-4',
         },
