@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, ListTodo, FileText, Code2, Terminal } from "lucide-react";
+import { BookOpen, ListTodo, FileText, Code2 } from "lucide-react";
 import type { NoteType } from './TextNode';
 
 export const FlowToolbar = () => {
@@ -11,7 +11,6 @@ export const FlowToolbar = () => {
         { type: 'main-topic' as NoteType, icon: ListTodo, label: 'Main Topic' },
         { type: 'sub-topic' as NoteType, icon: FileText, label: 'Sub Topic' },
         { type: 'code', icon: Code2, label: 'Code Editor' },
-        { type: 'terminal', icon: Terminal, label: 'Terminal' },
       ].map(({ type, icon: Icon, label }) => (
         <Button
           key={type}
