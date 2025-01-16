@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AceEditor from "react-ace";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ace from 'ace-builds';
 
 // Import Ace editor modes and themes
 import "ace-builds/src-noconflict/mode-javascript";
@@ -16,6 +17,10 @@ import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
+
+// Configure Ace Editor base path
+ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict/');
+ace.config.setModuleUrl('ace/mode/javascript_worker', '/node_modules/ace-builds/src-noconflict/worker-javascript.js');
 
 const languages = [
   'javascript',
@@ -62,7 +67,6 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
 
   const handleRun = useCallback(() => {
     try {
-      // For JavaScript code execution
       if (language === 'javascript') {
         // eslint-disable-next-line no-new-func
         const result = new Function(code)();
@@ -157,6 +161,7 @@ const CodeNode = ({ id, data, onDelete }: { id: string; data: CodeNodeData; onDe
                 enableSnippets: true,
                 showLineNumbers: true,
                 tabSize: 2,
+                useWorker: false // Disable web workers to avoid the loading error
               }}
             />
           </div>
