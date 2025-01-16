@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { useState, useCallback } from 'react';
 import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
@@ -7,47 +7,76 @@ import { Code2, Copy, Play, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AceEditor from 'react-ace';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ace from 'ace-builds';
 
-import 'ace-builds/src-noconflict/mode-javascript';
-import 'ace-builds/src-noconflict/theme-monokai';
-import 'ace-builds/src-noconflict/ext-language_tools';
+// Import Ace editor modes and themes
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/mode-typescript";
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-language_tools";
+
+// Configure Ace Editor base path
+ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict/');
+ace.config.setModuleUrl('ace/mode/javascript_worker', '/node_modules/ace-builds/src-noconflict/worker-javascript.js');
+
+const languages = [
+  'javascript',
+  'python',
+  'typescript'
+];
+
+const themes = [
+  'monokai',
+  'github'
+];
 
 interface CodeNodeData {
   code: string;
 }
 
-export const CodeNode = memo(({ id, data }: { id: string; data: CodeNodeData }) => {
+export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
+  const [code, setCode] = useState(data.code || '// Write your code here');
+  const [language, setLanguage] = useState('javascript');
+  const [theme, setTheme] = useState('monokai');
   const { deleteElements, setNodes } = useReactFlow();
 
-  const handleCodeChange = (newCode: string) => {
+  const handleCodeChange = useCallback((newCode: string) => {
+    setCode(newCode);
     setNodes((nodes) =>
       nodes.map((node) =>
         node.id === id ? { ...node, data: { ...node.data, code: newCode } } : node
       )
     );
-  };
+  }, [id, setNodes]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(data.code || '');
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(code);
     toast.success('Code copied to clipboard');
-  };
+  }, [code]);
 
-  const handleRun = () => {
+  const handleRun = useCallback(() => {
     try {
-      // eslint-disable-next-line no-new-func
-      const result = new Function(data.code)();
-      console.log('Code execution result:', result);
-      toast.success('Code executed successfully');
+      if (language === 'javascript') {
+        // eslint-disable-next-line no-new-func
+        const result = new Function(code)();
+        console.log('Code execution result:', result);
+        toast.success('Code executed successfully');
+      } else {
+        toast.error('Only JavaScript execution is supported at the moment');
+      }
     } catch (error) {
       console.error('Code execution error:', error);
       toast.error('Code execution failed');
     }
-  };
+  }, [code, language]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteElements({ nodes: [{ id }] });
     toast.success('Node deleted');
-  };
+  }, [deleteElements, id]);
 
   return (
     <>
@@ -72,6 +101,30 @@ export const CodeNode = memo(({ id, data }: { id: string; data: CodeNodeData }) 
               Code Editor
             </Badge>
             <div className="flex gap-2">
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="w-[120px] h-8">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map(lang => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={theme} onValueChange={setTheme}>
+                <SelectTrigger className="w-[100px] h-8">
+                  <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  {themes.map(t => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button variant="ghost" size="icon" onClick={handleCopy}>
                 <Copy className="h-4 w-4" />
               </Button>
@@ -86,10 +139,10 @@ export const CodeNode = memo(({ id, data }: { id: string; data: CodeNodeData }) 
 
           <div className="flex-1 min-h-[200px] rounded-md overflow-hidden border">
             <AceEditor
-              mode="javascript"
-              theme="monokai"
+              mode={language}
+              theme={theme}
               onChange={handleCodeChange}
-              value={data.code || '// Write your code here'}
+              value={code}
               name={`editor-${id}`}
               width="100%"
               height="100%"
@@ -103,6 +156,7 @@ export const CodeNode = memo(({ id, data }: { id: string; data: CodeNodeData }) 
                 enableSnippets: true,
                 showLineNumbers: true,
                 tabSize: 2,
+                useWorker: false // Disable web workers to avoid the loading error
               }}
             />
           </div>
@@ -126,4 +180,4 @@ export const CodeNode = memo(({ id, data }: { id: string; data: CodeNodeData }) 
       </Card>
     </>
   );
-});
+};
