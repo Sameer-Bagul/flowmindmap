@@ -14,13 +14,11 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ColorPicker } from '@/components/ColorPicker';
 import nodeTypes from '../components/nodeTypes';
 import { toast } from "sonner";
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
-import { useSettingsStore } from '@/store/settingsStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 
 const initialNodes = [];
@@ -39,7 +37,6 @@ const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
-  const { backgroundColor, setBackgroundColor } = useSettingsStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -96,21 +93,8 @@ const Index = () => {
     [nodes.length, setNodes, edges, setElements],
   );
 
-  const getNodeColor = (node) => {
-    switch (node.type) {
-      case 'chapter':
-        return 'rgba(254, 243, 199, 0.7)';
-      case 'main-topic':
-        return 'rgba(219, 234, 254, 0.7)';
-      case 'sub-topic':
-        return 'rgba(220, 252, 231, 0.7)';
-      default:
-        return '#fff';
-    }
-  };
-
   return (
-    <div className="w-screen h-screen" style={{ backgroundColor }}>
+    <div className="w-screen h-screen bg-background">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -130,10 +114,6 @@ const Index = () => {
         <Panel position="top-left" className="flex flex-col gap-4">
           <FlowToolbar />
           <FlowControls />
-          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm p-2 rounded-md">
-            <span className="text-sm text-white">Background:</span>
-            <ColorPicker value={backgroundColor} onChange={setBackgroundColor} />
-          </div>
           <Link to="/shortcuts">
             <Button variant="outline" className="w-full">
               View Shortcuts
