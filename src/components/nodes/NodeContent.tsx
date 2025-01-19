@@ -69,15 +69,28 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
         <Button variant="ghost" size="icon" onClick={() => addMedia('video')}>
           <Video className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={() => addMedia('youtube')}>
-          <Video className="h-4 w-4" />
-        </Button>
         <Button variant="ghost" size="icon" onClick={() => addMedia('link')}>
           <Link className="h-4 w-4" />
         </Button>
       </div>
 
       <NoteEditor content={data.content || ''} onChange={handleContentChange} />
+
+      {data.media && data.media.map((item, index) => (
+        <div key={index} className="relative rounded-md overflow-hidden">
+          {item.type === 'image' && (
+            <img src={item.url} alt="Node media" className="w-full h-auto" />
+          )}
+          {item.type === 'video' && (
+            <video src={item.url} controls className="w-full h-auto" />
+          )}
+          {item.type === 'link' && (
+            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+              {item.url}
+            </a>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

@@ -129,3 +129,15 @@
 .glass-morphism {
   @apply bg-white/20 dark:bg-zinc-900/20 backdrop-blur-lg border border-white/30 dark:border-white/10;
 }
+
+.react-flow__handle {
+  @apply opacity-100 !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: hsl(var(--primary)) !important;
+  border: 2px solid white !important;
+}
+
+.react-flow__handle:hover {
+  @apply bg-primary !important;
+}
