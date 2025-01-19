@@ -6,17 +6,18 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Shortcuts from "./pages/Shortcuts";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 1000,
-      retry: 1,
-    },
-  },
-});
+import { useState } from "react";
 
 function App() {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 1000,
+        retry: 1,
+      },
+    },
+  }));
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

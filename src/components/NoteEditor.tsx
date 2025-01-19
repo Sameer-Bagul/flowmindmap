@@ -8,6 +8,7 @@ import Image from '@tiptap/extension-image';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { Select } from './ui/select';
+import { cn } from '@/lib/utils';
 import { 
   Bold, 
   Italic, 
