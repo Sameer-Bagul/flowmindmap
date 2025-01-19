@@ -33,6 +33,13 @@ const defaultEdgeOptions = {
   },
 };
 
+const nodeConstraints = {
+  minWidth: 350,
+  maxWidth: 800,
+  minHeight: 250,
+  maxHeight: 600,
+};
+
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -80,6 +87,10 @@ const Index = () => {
         data: { 
           label: `New ${type.replace('-', ' ')}`,
           type,
+        },
+        style: {
+          width: nodeConstraints.minWidth,
+          height: nodeConstraints.minHeight,
         },
       };
 

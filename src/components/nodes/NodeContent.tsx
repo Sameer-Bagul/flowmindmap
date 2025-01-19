@@ -106,11 +106,6 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
               allowFullScreen
             />
           )}
-          {item.type === 'link' && (
-            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-              {item.url}
-            </a>
-          )}
         </div>
       ))}
     </div>
