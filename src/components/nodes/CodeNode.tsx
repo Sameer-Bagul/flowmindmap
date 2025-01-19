@@ -1,31 +1,26 @@
 import { useState, useCallback } from 'react';
-import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react';
+import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code2, Copy, Play, Trash2 } from "lucide-react";
+import { Code2, Copy, Download, Upload, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AceEditor from 'react-ace';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ace from 'ace-builds';
 
 // Import Ace editor modes and themes
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/mode-typescript";
-import "ace-builds/src-noconflict/theme-monokai";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools";
-
-// Configure Ace Editor base path
-ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict/');
-ace.config.setModuleUrl('ace/mode/javascript_worker', '/node_modules/ace-builds/src-noconflict/worker-javascript.js');
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/mode-typescript';
+import 'ace-builds/src-noconflict/theme-monokai';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
 const languages = [
   'javascript',
-  'python',
-  'typescript'
+  'typescript',
+  'python'
 ];
 
 const themes = [
@@ -35,32 +30,37 @@ const themes = [
 
 interface CodeNodeData {
   code: string;
+  language?: string;
+  theme?: string;
 }
 
 export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
   const [code, setCode] = useState(data.code || '// Write your code here');
-  const [language, setLanguage] = useState('javascript');
-  const [theme, setTheme] = useState('monokai');
-  const { deleteElements, setNodes } = useReactFlow();
-
-  const handleCodeChange = useCallback((newCode: string) => {
-    setCode(newCode);
-    setNodes((nodes) =>
-      nodes.map((node) =>
-        node.id === id ? { ...node, data: { ...node.data, code: newCode } } : node
-      )
-    );
-  }, [id, setNodes]);
+  const [language, setLanguage] = useState(data.language || 'javascript');
+  const [theme, setTheme] = useState(data.theme || 'monokai');
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code);
     toast.success('Code copied to clipboard');
   }, [code]);
 
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `code.${language}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Code downloaded');
+  }, [code, language]);
+
   const handleRun = useCallback(() => {
     try {
       if (language === 'javascript') {
-        // eslint-disable-next-line no-new-func
+        // eslint-disable-next-line no-new-Function
         const result = new Function(code)();
         console.log('Code execution result:', result);
         toast.success('Code executed successfully');
@@ -72,11 +72,6 @@ export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
       toast.error('Code execution failed');
     }
   }, [code, language]);
-
-  const handleDelete = useCallback(() => {
-    deleteElements({ nodes: [{ id }] });
-    toast.success('Node deleted');
-  }, [deleteElements, id]);
 
   return (
     <>
@@ -128,11 +123,11 @@ export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
               <Button variant="ghost" size="icon" onClick={handleCopy}>
                 <Copy className="h-4 w-4" />
               </Button>
+              <Button variant="ghost" size="icon" onClick={handleDownload}>
+                <Download className="h-4 w-4" />
+              </Button>
               <Button variant="ghost" size="icon" onClick={handleRun}>
                 <Play className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -141,7 +136,7 @@ export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
             <AceEditor
               mode={language}
               theme={theme}
-              onChange={handleCodeChange}
+              onChange={setCode}
               value={code}
               name={`editor-${id}`}
               width="100%"
@@ -156,7 +151,7 @@ export const CodeNode = ({ id, data }: { id: string; data: CodeNodeData }) => {
                 enableSnippets: true,
                 showLineNumbers: true,
                 tabSize: 2,
-                useWorker: false // Disable web workers to avoid the loading error
+                useWorker: false
               }}
             />
           </div>
