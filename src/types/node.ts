@@ -3,9 +3,11 @@ import { Position } from '@xyflow/react';
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
 export type MediaItem = {
-  type: 'image' | 'video' | 'youtube' | 'link';
+  type: 'image' | 'video' | 'youtube';
   url: string;
 };
+
+export type DocumentFormat = 'default' | 'a4';
 
 export interface HandleData {
   id: string;
@@ -22,4 +24,7 @@ export interface TextNodeData {
   borderColor?: string;
   media?: MediaItem[];
   handles?: HandleData[];
+  format?: DocumentFormat;
+  fontSize?: number;
+  lineHeight?: number;
 }

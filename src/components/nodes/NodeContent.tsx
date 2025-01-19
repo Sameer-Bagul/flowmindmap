@@ -2,13 +2,15 @@ import { useState, useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Image, Link, Video } from 'lucide-react';
 import { NoteEditor } from '../NoteEditor';
 import { toast } from 'sonner';
-import type { TextNodeData, MediaItem } from '../../types/node';
+import type { TextNodeData, MediaItem, DocumentFormat } from '../../types/node';
 
 export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) => {
   const [mediaUrl, setMediaUrl] = useState('');
+  const [format, setFormat] = useState<DocumentFormat>(data.format || 'default');
   const { setNodes } = useReactFlow();
 
   const getYouTubeVideoId = (url: string) => {
@@ -64,9 +66,37 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
     );
   }, [id, setNodes]);
 
+  const handleFormatChange = useCallback((newFormat: DocumentFormat) => {
+    setFormat(newFormat);
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              format: newFormat
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 items-center">
+        <Select value={format} onValueChange={handleFormatChange}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Default</SelectItem>
+            <SelectItem value="a4">A4</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Input
           type="text"
           value={mediaUrl}
@@ -85,7 +115,11 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
         </Button>
       </div>
 
-      <NoteEditor content={data.content || ''} onChange={handleContentChange} />
+      <NoteEditor 
+        content={data.content || ''} 
+        onChange={handleContentChange}
+        format={format}
+      />
 
       {data.media && data.media.map((item, index) => (
         <div key={index} className="relative rounded-md overflow-hidden">
@@ -96,15 +130,18 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
             <video src={item.url} controls className="w-full h-auto" />
           )}
           {item.type === 'youtube' && (
-            <iframe
-              width="100%"
-              height="315"
-              src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            <div className="aspect-video w-full">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0"
+              />
+            </div>
           )}
         </div>
       ))}
