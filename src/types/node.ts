@@ -14,26 +14,12 @@ export interface HandleData {
   y: number;
 }
 
-export interface BaseNodeData {
+export interface TextNodeData {
   label: string;
   content?: string;
-}
-
-export interface TextNodeData extends BaseNodeData {
   type: NoteType;
   backgroundColor?: string;
   borderColor?: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video' | 'link';
+  media?: MediaItem[];
   handles?: HandleData[];
-}
-
-export interface CodeNodeData extends BaseNodeData {
-  code: string;
-  language: string;
-  theme: string;
-  fontSize?: number;
-  wordWrap?: boolean;
-  minimap?: boolean;
-  lineNumbers?: boolean;
 }

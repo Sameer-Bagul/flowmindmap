@@ -5,15 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Image, Link, Video } from 'lucide-react';
 import { NoteEditor } from '../NoteEditor';
 import { toast } from 'sonner';
-import type { TextNodeData, MediaItem } from '../TextNode';
+import type { TextNodeData, MediaItem } from '../../types/node';
 
 export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) => {
   const [mediaUrl, setMediaUrl] = useState('');
   const { setNodes } = useReactFlow();
 
+  const getYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
   const addMedia = useCallback((type: MediaItem['type']) => {
     if (!mediaUrl) {
       toast.error('Please enter a valid URL');
+      return;
+    }
+
+    if (type === 'youtube' && !getYouTubeVideoId(mediaUrl)) {
+      toast.error('Please enter a valid YouTube URL');
       return;
     }
 
@@ -69,7 +80,7 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
         <Button variant="ghost" size="icon" onClick={() => addMedia('video')}>
           <Video className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={() => addMedia('link')}>
+        <Button variant="ghost" size="icon" onClick={() => addMedia('youtube')}>
           <Link className="h-4 w-4" />
         </Button>
       </div>
@@ -83,6 +94,17 @@ export const NodeContent = ({ id, data }: { id: string; data: TextNodeData }) =>
           )}
           {item.type === 'video' && (
             <video src={item.url} controls className="w-full h-auto" />
+          )}
+          {item.type === 'youtube' && (
+            <iframe
+              width="100%"
+              height="315"
+              src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           )}
           {item.type === 'link' && (
             <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">

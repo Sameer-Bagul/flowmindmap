@@ -13,13 +13,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useFlowStore } from "@/store/flowStore";
 
 export const FlowActions = () => {
   const { setNodes, setEdges } = useReactFlow();
+  const { setElements } = useFlowStore();
 
   const clearFlow = () => {
     setNodes([]);
     setEdges([]);
+    setElements([], []);
     toast.success('Flow cleared successfully');
   };
 
