@@ -14,10 +14,6 @@ import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
-export type MediaItem = {
-  type: 'image' | 'video' | 'youtube' | 'link';
-  url: string;
-};
 
 interface HandleData {
   id: string;
@@ -41,19 +37,19 @@ const getDefaultColors = (type: NoteType) => {
   switch (type) {
     case 'chapter':
       return {
-        bg: 'rgba(254, 243, 199, 0.7)',
+        bg: 'rgba(254, 243, 199, 0.95)',
         border: '#f59e0b',
         badge: 'warning'
       };
     case 'main-topic':
       return {
-        bg: 'rgba(219, 234, 254, 0.7)',
+        bg: 'rgba(219, 234, 254, 0.95)',
         border: '#3b82f6',
         badge: 'secondary'
       };
     case 'sub-topic':
       return {
-        bg: 'rgba(220, 252, 231, 0.7)',
+        bg: 'rgba(220, 252, 231, 0.95)',
         border: '#22c55e',
         badge: 'default'
       };
@@ -144,13 +140,15 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     <Card 
       ref={nodeRef}
       className={cn(
-        "min-w-[350px] min-h-[250px] p-6",
-        "bg-white/80 dark:bg-white/80",
+        "min-w-[595px] min-h-[842px] p-8", // A4 dimensions in pixels
+        "bg-white/95 dark:bg-white/95",
         "backdrop-blur-xl border-2",
         "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
         "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
         "transition-shadow duration-200",
-        "transform hover:scale-85 transition-transform duration-100"
+        "bg-[linear-gradient(transparent_27px,#eee_1px)]",
+        "bg-[size:100%_28px]",
+        "relative"
       )}
       style={{
         backgroundColor: data.backgroundColor || defaultColors.bg,
@@ -205,19 +203,24 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             autoFocus
-            className="text-lg font-medium bg-white/50 backdrop-blur-sm text-gray-800"
+            className="text-xl font-medium bg-white/50 backdrop-blur-sm text-gray-800"
             placeholder="Enter note title..."
           />
         ) : (
           <div
             onDoubleClick={handleDoubleClick}
-            className="text-lg font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
+            className="text-xl font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
           >
             {label || 'Double click to edit'}
           </div>
         )}
 
-        <NoteEditor content={data.content || ''} onChange={handleContentChange} />
+        <NoteEditor 
+          content={data.content || ''} 
+          onChange={handleContentChange}
+          format="a4"
+          autoFocus
+        />
       </div>
 
       <div className="absolute inset-0 pointer-events-none">
@@ -241,4 +244,3 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
 };
 
 export default TextNode;
-

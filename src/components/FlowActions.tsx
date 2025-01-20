@@ -30,30 +30,9 @@ export const FlowActions = () => {
     <div className="flex gap-2">
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" className="gap-2">
-            <Trash2 className="h-4 w-4" />
-            Delete Selected
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action will remove the selected nodes and connections from your flow. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={clearFlow}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="destructive" className="gap-2">
-            <Eraser className="h-4 w-4" />
-            Clear All
+          <Button variant="destructive" size="lg" className="gap-2">
+            <Eraser className="h-5 w-5" />
+            Clear Canvas
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>

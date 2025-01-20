@@ -20,6 +20,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
+import { FlowActions } from '@/components/FlowActions';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -31,13 +32,6 @@ const defaultEdgeOptions = {
     strokeWidth: 2,
     stroke: 'hsl(var(--primary))',
   },
-};
-
-const nodeConstraints = {
-  minWidth: 350,
-  maxWidth: 800,
-  minHeight: 250,
-  maxHeight: 600,
 };
 
 const Index = () => {
@@ -89,8 +83,8 @@ const Index = () => {
           type,
         },
         style: {
-          width: nodeConstraints.minWidth,
-          height: nodeConstraints.minHeight,
+          width: 350,
+          height: 250,
         },
       };
 
@@ -125,6 +119,7 @@ const Index = () => {
         <Panel position="top-left" className="flex flex-col gap-4">
           <FlowToolbar />
           <FlowControls />
+          <FlowActions />
           <Link to="/shortcuts">
             <Button variant="outline" className="w-full">
               View Shortcuts
