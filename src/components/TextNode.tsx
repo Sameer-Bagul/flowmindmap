@@ -5,13 +5,14 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings2 } from "lucide-react";
+import { Trash2, Settings2, Image, Link, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
+import { MediaSection } from './nodes/MediaSection';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
@@ -140,14 +141,12 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     <Card 
       ref={nodeRef}
       className={cn(
-        "min-w-[595px] min-h-[842px] p-8", // A4 dimensions in pixels
+        "min-w-[450px] min-h-[350px] p-6",
         "bg-white/95 dark:bg-white/95",
         "backdrop-blur-xl border-2",
         "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
         "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
         "transition-shadow duration-200",
-        "bg-[linear-gradient(transparent_27px,#eee_1px)]",
-        "bg-[size:100%_28px]",
         "relative"
       )}
       style={{
@@ -215,10 +214,47 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
           </div>
         )}
 
+        <MediaSection 
+          media={data.media} 
+          onAddMedia={(item) => {
+            setNodes(nodes => 
+              nodes.map(node => {
+                if (node.id === id) {
+                  return {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      media: [...(node.data.media || []), item]
+                    }
+                  };
+                }
+                return node;
+              })
+            );
+          }}
+          onRemoveMedia={(index) => {
+            setNodes(nodes => 
+              nodes.map(node => {
+                if (node.id === id) {
+                  const media = [...(node.data.media || [])];
+                  media.splice(index, 1);
+                  return {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      media
+                    }
+                  };
+                }
+                return node;
+              })
+            );
+          }}
+        />
+
         <NoteEditor 
           content={data.content || ''} 
           onChange={handleContentChange}
-          format="a4"
           autoFocus
         />
       </div>
