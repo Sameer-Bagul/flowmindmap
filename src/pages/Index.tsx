@@ -10,6 +10,7 @@ import {
   Connection,
   ConnectionMode,
   Panel,
+  ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -21,6 +22,7 @@ import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
+import { MediaSidebar } from '@/components/MediaSidebar';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -68,6 +70,7 @@ const Index = () => {
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
+      // Get the reactflow wrapper bounds
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const position = {
         x: event.clientX - reactFlowBounds.left,
@@ -82,10 +85,6 @@ const Index = () => {
           label: `New ${type.replace('-', ' ')}`,
           type,
         },
-        style: {
-          width: 350,
-          height: 250,
-        },
       };
 
       setNodes((nds) => {
@@ -99,40 +98,43 @@ const Index = () => {
   );
 
   return (
-    <div className="w-screen h-screen bg-background">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        defaultEdgeOptions={defaultEdgeOptions}
-        connectionMode={ConnectionMode.Loose}
-        fitView
-        className="bg-background transition-colors duration-200"
-        minZoom={0.2}
-        maxZoom={4}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-      >
-        <Panel position="top-left" className="flex flex-col gap-4">
-          <FlowToolbar />
-          <FlowControls />
-          <FlowActions />
-          <Link to="/shortcuts">
-            <Button variant="outline" className="w-full">
-              View Shortcuts
-            </Button>
-          </Link>
-        </Panel>
-        <Panel position="top-right" className="flex gap-2">
-          <ThemeToggle />
-        </Panel>
-        <Controls className="bg-background/80 border-border shadow-sm" />
-        <MiniMap className="bg-background/80 border-border shadow-sm" />
-        <Background color="#666" gap={16} size={1} />
-      </ReactFlow>
+    <div className="w-screen h-screen flex bg-background">
+      <MediaSidebar />
+      <div className="flex-1">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          defaultEdgeOptions={defaultEdgeOptions}
+          connectionMode={ConnectionMode.Loose}
+          fitView
+          className="bg-background transition-colors duration-200"
+          minZoom={0.2}
+          maxZoom={4}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+        >
+          <Panel position="top-left" className="flex flex-col gap-4">
+            <FlowToolbar />
+            <FlowControls />
+            <FlowActions />
+            <Link to="/shortcuts">
+              <Button variant="outline" className="w-full">
+                View Shortcuts
+              </Button>
+            </Link>
+          </Panel>
+          <Panel position="top-right" className="flex gap-2">
+            <ThemeToggle />
+          </Panel>
+          <Controls className="bg-background/80 border-border shadow-sm" />
+          <MiniMap className="bg-background/80 border-border shadow-sm" />
+          <Background color="#666" gap={16} size={1} />
+        </ReactFlow>
+      </div>
     </div>
   );
 };
