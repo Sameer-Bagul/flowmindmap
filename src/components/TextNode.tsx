@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings2, Image, Link, Video } from "lucide-react";
+import { Trash2, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
@@ -13,28 +13,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 import { MediaSection } from './nodes/MediaSection';
+import type { TextNodeData, MediaItem } from '../types/node';
 
-export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
-
-interface HandleData {
-  id: string;
-  position: Position;
-  x: number;
-  y: number;
-}
-
-export interface TextNodeData {
-  label: string;
-  content?: string;
-  type: NoteType;
-  backgroundColor?: string;
-  borderColor?: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video' | 'link';
-  handles?: HandleData[];
-}
-
-const getDefaultColors = (type: NoteType) => {
+const getDefaultColors = (type: TextNodeData['type']) => {
   switch (type) {
     case 'chapter':
       return {
@@ -137,6 +118,43 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
+  const handleAddMedia = useCallback((mediaItem: MediaItem) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          const currentMedia = Array.isArray(node.data.media) ? node.data.media : [];
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              media: [...currentMedia, mediaItem]
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
+  const handleRemoveMedia = useCallback((index: number) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          const media = Array.isArray(node.data.media) ? [...node.data.media] : [];
+          media.splice(index, 1);
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              media
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
   return (
     <Card 
       ref={nodeRef}
@@ -215,41 +233,9 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         )}
 
         <MediaSection 
-          media={data.media} 
-          onAddMedia={(item) => {
-            setNodes(nodes => 
-              nodes.map(node => {
-                if (node.id === id) {
-                  return {
-                    ...node,
-                    data: {
-                      ...node.data,
-                      media: [...(node.data.media || []), item]
-                    }
-                  };
-                }
-                return node;
-              })
-            );
-          }}
-          onRemoveMedia={(index) => {
-            setNodes(nodes => 
-              nodes.map(node => {
-                if (node.id === id) {
-                  const media = [...(node.data.media || [])];
-                  media.splice(index, 1);
-                  return {
-                    ...node,
-                    data: {
-                      ...node.data,
-                      media
-                    }
-                  };
-                }
-                return node;
-              })
-            );
-          }}
+          media={data.media || []}
+          onAddMedia={handleAddMedia}
+          onRemoveMedia={handleRemoveMedia}
         />
 
         <NoteEditor 
