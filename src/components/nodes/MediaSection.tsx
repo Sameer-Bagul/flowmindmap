@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Image, Link, Video, X } from 'lucide-react';
+import { Image, Link, Video, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { MediaItem, MediaType } from '@/types/node';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface MediaSectionProps {
   media?: MediaItem[];
@@ -59,37 +66,45 @@ export const MediaSection = ({ media = [], onAddMedia, onRemoveMedia }: MediaSec
         <Button onClick={handleAddMedia}>Add</Button>
       </div>
 
-      <div className="space-y-4">
-        {media.map((item, index) => (
-          <div key={index} className="relative group">
-            {item.type === 'youtube' ? (
-              <div className="aspect-video w-full rounded-lg overflow-hidden">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}`}
-                  title="YouTube video player"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0"
-                />
-              </div>
-            ) : item.type === 'image' ? (
-              <img src={item.url} alt="Media content" className="w-full rounded-lg" />
-            ) : (
-              <video src={item.url} controls className="w-full rounded-lg" />
-            )}
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => onRemoveMedia(index)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-      </div>
+      {media.length > 0 && (
+        <Carousel className="w-full">
+          <CarouselContent>
+            {media.map((item, index) => (
+              <CarouselItem key={index}>
+                <div className="relative group">
+                  {item.type === 'youtube' ? (
+                    <div className="aspect-video w-full rounded-lg overflow-hidden">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}`}
+                        title="YouTube video player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0"
+                      />
+                    </div>
+                  ) : item.type === 'image' ? (
+                    <img src={item.url} alt="Media content" className="w-full rounded-lg" />
+                  ) : (
+                    <video src={item.url} controls className="w-full rounded-lg" />
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onRemoveMedia(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      )}
     </div>
   );
 };
