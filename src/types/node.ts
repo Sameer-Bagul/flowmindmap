@@ -2,12 +2,15 @@ import { Position } from '@xyflow/react';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
+export type MediaType = 'image' | 'video' | 'youtube';
+
 export type MediaItem = {
-  type: 'image' | 'video' | 'youtube';
+  type: MediaType;
   url: string;
+  title?: string;
 };
 
-export type DocumentFormat = 'default' | 'a4';
+export type DocumentFormat = 'default' | 'a4' | 'wide';
 
 export interface HandleData {
   id: string;
@@ -27,4 +30,5 @@ export interface TextNodeData {
   format?: DocumentFormat;
   fontSize?: number;
   lineHeight?: number;
+  lastEdited?: Date;
 }
