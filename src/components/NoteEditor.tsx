@@ -7,7 +7,6 @@ import TextAlign from '@tiptap/extension-text-align';
 import Image from '@tiptap/extension-image';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
-import { Select } from './ui/select';
 import { cn } from '@/lib/utils';
 import { 
   Bold, 
@@ -24,16 +23,18 @@ import {
   Heading2,
   Heading3
 } from 'lucide-react';
+import type { DocumentFormat } from '../types/node';
 
 const lowlight = createLowlight(common);
 
 interface NoteEditorProps {
   content: string;
   onChange: (content: string) => void;
-  format?: 'default' | 'a4';
+  format?: DocumentFormat;
+  autoFocus?: boolean;
 }
 
-export const NoteEditor = ({ content, onChange, format = 'default' }: NoteEditorProps) => {
+export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = false }: NoteEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -58,6 +59,7 @@ export const NoteEditor = ({ content, onChange, format = 'default' }: NoteEditor
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    autofocus: autoFocus,
   });
 
   if (!editor) {
@@ -189,7 +191,8 @@ export const NoteEditor = ({ content, onChange, format = 'default' }: NoteEditor
         editor={editor} 
         className={cn(
           "prose prose-sm dark:prose-invert max-w-none min-h-[100px] border rounded-md p-4",
-          format === 'a4' && "aspect-[1/1.4142] w-full"
+          format === 'a4' && "aspect-[1/1.4142] w-full",
+          format === 'wide' && "aspect-[16/9] w-full"
         )}
       />
     </div>
