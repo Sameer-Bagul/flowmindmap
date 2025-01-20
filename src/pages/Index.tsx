@@ -99,7 +99,7 @@ const Index = () => {
 
   return (
     <div className="w-screen h-screen flex bg-background">
-      <MediaSidebar />
+      {/* <MediaSidebar /> */}
       <div className="flex-1">
         <ReactFlow
           nodes={nodes}
