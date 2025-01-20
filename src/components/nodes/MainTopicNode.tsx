@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { NodeControls } from './NodeControls';
 import { NodeContent } from './NodeContent';
-import type { TextNodeData } from '../TextNode';
+import type { TextNodeData } from '@/types/node';
 
 const MainTopicNode = ({ id, data }: { id: string; data: TextNodeData }) => {
   return (

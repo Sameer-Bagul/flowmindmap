@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Label } from '@/components/ui/label';
 import { ColorPicker } from '../ColorPicker';
 import { toast } from 'sonner';
-import type { TextNodeData } from '../TextNode';
+import type { TextNodeData } from '@/types/node';
 
 export const NodeControls = ({ id, data }: { id: string; data: TextNodeData }) => {
   const { deleteElements, setNodes } = useReactFlow();
