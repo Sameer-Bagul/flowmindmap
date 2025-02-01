@@ -5,13 +5,20 @@ import { common, createLowlight } from 'lowlight';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Image from '@tiptap/extension-image';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import Highlight from '@tiptap/extension-highlight';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { 
   Bold, 
   Italic, 
-  Underline as UnderlineIcon, 
+  Underline as UnderlineIcon,
   AlignLeft, 
   AlignCenter, 
   AlignRight, 
@@ -21,7 +28,12 @@ import {
   ListOrdered,
   Heading1,
   Heading2,
-  Heading3
+  Heading3,
+  Table as TableIcon,
+  CheckSquare,
+  Highlighter,
+  RotateCcw,
+  RotateCw
 } from 'lucide-react';
 import type { DocumentFormat } from '../types/node';
 
@@ -54,6 +66,19 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
         types: ['heading', 'paragraph'],
       }),
       Image,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -65,6 +90,10 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
   if (!editor) {
     return null;
   }
+
+  const addTable = () => {
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -93,6 +122,14 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
             className={editor.isActive('underline') ? 'bg-muted' : ''}
           >
             <UnderlineIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            className={editor.isActive('highlight') ? 'bg-muted' : ''}
+          >
+            <Highlighter className="h-4 w-4" />
           </Button>
         </div>
 
@@ -144,6 +181,14 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            className={editor.isActive('taskList') ? 'bg-muted' : ''}
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
         </div>
 
         <Separator orientation="vertical" className="h-6" />
@@ -177,20 +222,56 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
 
         <Separator orientation="vertical" className="h-6" />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={editor.isActive('codeBlock') ? 'bg-muted' : ''}
-        >
-          <Code2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            className={editor.isActive('codeBlock') ? 'bg-muted' : ''}
+          >
+            <Code2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={addTable}
+            className={editor.isActive('table') ? 'bg-muted' : ''}
+          >
+            <TableIcon className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+          >
+            <RotateCw className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <EditorContent 
         editor={editor} 
         className={cn(
           "prose prose-sm dark:prose-invert max-w-none min-h-[100px] border rounded-md p-4",
+          "prose-headings:mb-3 prose-headings:mt-4 first:prose-headings:mt-0",
+          "prose-p:my-2 prose-p:leading-relaxed",
+          "prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border",
+          "prose-code:bg-muted/50 prose-code:px-1 prose-code:rounded-sm prose-code:border prose-code:border-border",
+          "prose-img:rounded-md prose-img:border prose-img:border-border",
           format === 'a4' && "aspect-[1/1.4142] w-full",
           format === 'wide' && "aspect-[16/9] w-full"
         )}
