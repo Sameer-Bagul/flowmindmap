@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 import { MediaSection } from './nodes/MediaSection';
-import type { TextNodeData, MediaItem } from '../types/node';
+import type { TextNodeData, MediaItem, Tag } from '../types/node';
 import { TagInput } from './TagInput';
 
 const getDefaultColors = (type: TextNodeData['type']) => {
@@ -119,16 +119,16 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
-  const handleAddMedia = useCallback((mediaItem: MediaItem) => {
+  const handleAddTag = useCallback((tag: Tag) => {
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
-          const currentMedia = Array.isArray(node.data.media) ? node.data.media : [];
+          const currentTags = Array.isArray(node.data.tags) ? node.data.tags : [];
           return {
             ...node,
             data: {
               ...node.data,
-              media: [...currentMedia, mediaItem]
+              tags: [...currentTags, tag]
             }
           };
         }
@@ -137,17 +137,16 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
-  const handleRemoveMedia = useCallback((index: number) => {
+  const handleRemoveTag = useCallback((tagId: string) => {
     setNodes(nodes => 
       nodes.map(node => {
         if (node.id === id) {
-          const media = Array.isArray(node.data.media) ? [...node.data.media] : [];
-          media.splice(index, 1);
+          const currentTags = Array.isArray(node.data.tags) ? node.data.tags : [];
           return {
             ...node,
             data: {
               ...node.data,
-              media
+              tags: currentTags.filter(t => t.id !== tagId)
             }
           };
         }
@@ -234,43 +233,13 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         )}
 
         <TagInput
-          tags={data.tags || []}
-          onAddTag={(tag) => {
-            setNodes(nodes => 
-              nodes.map(node => {
-                if (node.id === id) {
-                  return {
-                    ...node,
-                    data: {
-                      ...node.data,
-                      tags: [...(node.data.tags || []), tag]
-                    }
-                  };
-                }
-                return node;
-              })
-            );
-          }}
-          onRemoveTag={(tagId) => {
-            setNodes(nodes => 
-              nodes.map(node => {
-                if (node.id === id) {
-                  return {
-                    ...node,
-                    data: {
-                      ...node.data,
-                      tags: (node.data.tags || []).filter(t => t.id !== tagId)
-                    }
-                  };
-                }
-                return node;
-              })
-            );
-          }}
+          tags={Array.isArray(data.tags) ? data.tags : []}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
         />
 
         <MediaSection 
-          media={data.media || []}
+          media={Array.isArray(data.media) ? data.media : []}
           onAddMedia={handleAddMedia}
           onRemoveMedia={handleRemoveMedia}
         />
