@@ -155,6 +155,43 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [id, setNodes]);
 
+  const handleAddMedia = useCallback((mediaItem: MediaItem) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          const currentMedia = Array.isArray(node.data.media) ? node.data.media : [];
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              media: [...currentMedia, mediaItem]
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
+  const handleRemoveMedia = useCallback((index: number) => {
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          const media = Array.isArray(node.data.media) ? [...node.data.media] : [];
+          media.splice(index, 1);
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              media
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
   return (
     <Card 
       ref={nodeRef}
