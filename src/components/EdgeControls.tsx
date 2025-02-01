@@ -3,7 +3,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { useReactFlow, Edge } from '@xyflow/react';
 import { toast } from "sonner";
 import { ColorPicker } from './ColorPicker';
@@ -179,6 +178,7 @@ export const EdgeControls = () => {
         onClick={deleteSelectedEdge} 
         variant="destructive"
         className="w-full"
+        disabled={!selectedEdge}
       >
         Delete Edge
       </Button>

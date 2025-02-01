@@ -1,20 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
-import type { Handle as HandleType, Position } from '@xyflow/react';
-import { Handle, useReactFlow } from '@xyflow/react';
+import { useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Trash2, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ColorPicker } from './ColorPicker';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 import { MediaSection } from './nodes/MediaSection';
-import type { TextNodeData, MediaItem, Tag } from '../types/node';
 import { TagInput } from './TagInput';
+import { NodeHeader } from './nodes/NodeHeader';
+import { NodeHandles } from './nodes/NodeHandles';
+import type { TextNodeData, MediaItem, Tag } from '../types/node';
 
 const getDefaultColors = (type: TextNodeData['type']) => {
   switch (type) {
@@ -210,44 +205,14 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
       }}
     >
       <div className="h-full flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
-            {data.type.replace('-', ' ')}
-          </Badge>
-          <div className="flex gap-2 items-center">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Settings2 className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-60 flex flex-col gap-4 bg-white/80 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <Label>Background</Label>
-                  <ColorPicker
-                    value={data.backgroundColor || defaultColors.bg}
-                    onChange={(color) => updateNodeColor('backgroundColor', color)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Border</Label>
-                  <ColorPicker
-                    value={data.borderColor || defaultColors.border}
-                    onChange={(color) => updateNodeColor('borderColor', color)}
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive/90"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <NodeHeader
+          type={data.type}
+          backgroundColor={data.backgroundColor || defaultColors.bg}
+          borderColor={data.borderColor || defaultColors.border}
+          defaultColors={defaultColors}
+          onUpdateColor={updateNodeColor}
+          onDelete={handleDelete}
+        />
 
         {isEditing ? (
           <Input
@@ -288,22 +253,7 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         />
       </div>
 
-      <div className="absolute inset-0 pointer-events-none">
-        {['top', 'right', 'bottom', 'left'].map((position) => (
-          <Handle
-            key={position}
-            type="source"
-            position={position as Position}
-            className={cn(
-              "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-              "!bg-primary/50 hover:!bg-primary",
-              "w-3 h-3 rounded-full border-2 border-white"
-            )}
-            id={`${position}-${id}`}
-            isConnectable={isConnectable}
-          />
-        ))}
-      </div>
+      <NodeHandles id={id} isConnectable={isConnectable} />
     </Card>
   );
 };
