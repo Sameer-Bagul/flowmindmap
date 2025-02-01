@@ -15,6 +15,7 @@ import TableHeader from '@tiptap/extension-table-header';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
+import { CodeBlock } from './editor/CodeBlock';
 import { 
   Bold, 
   Italic, 
@@ -23,7 +24,6 @@ import {
   AlignCenter, 
   AlignRight, 
   Code2,
-  Image as ImageIcon,
   List,
   ListOrdered,
   Heading1,
@@ -35,7 +35,6 @@ import {
   RotateCcw,
   RotateCw
 } from 'lucide-react';
-import type { DocumentFormat } from '../types/node';
 
 const lowlight = createLowlight(common);
 
@@ -60,6 +59,7 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
         HTMLAttributes: {
           class: 'bg-muted/50 rounded-md p-4',
         },
+        nodeView: CodeBlock,
       }),
       Underline,
       TextAlign.configure({
@@ -85,6 +85,24 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
       onChange(editor.getHTML());
     },
     autofocus: autoFocus,
+    editorProps: {
+      attributes: {
+        class: cn(
+          'prose prose-sm dark:prose-invert max-w-none min-h-[100px]',
+          'focus:outline-none',
+          'prose-headings:font-semibold prose-headings:tracking-tight',
+          'prose-p:leading-relaxed',
+          'prose-pre:p-0 prose-pre:bg-transparent prose-pre:overflow-hidden',
+          'prose-code:px-1 prose-code:rounded-md prose-code:bg-muted/50 prose-code:border',
+          'prose-img:rounded-md prose-img:border prose-img:shadow-md',
+          'prose-blockquote:border-l-4 prose-blockquote:border-primary/20',
+          'prose-strong:font-semibold prose-strong:text-foreground',
+          'prose-em:text-foreground/80',
+          'prose-ul:list-disc prose-ol:list-decimal',
+          'prose-li:marker:text-foreground/60'
+        )
+      }
+    }
   });
 
   if (!editor) {
@@ -96,8 +114,8 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2 flex-wrap items-center border rounded-md p-2 bg-background/50">
+    <div className="flex flex-col gap-2 bg-background/50 backdrop-blur-sm rounded-md p-4 border">
+      <div className="flex gap-2 flex-wrap items-center rounded-md p-2 bg-muted/30">
         <div className="flex gap-1">
           <Button
             variant="ghost"
@@ -266,12 +284,10 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
       <EditorContent 
         editor={editor} 
         className={cn(
-          "prose prose-sm dark:prose-invert max-w-none min-h-[100px] border rounded-md p-4",
-          "prose-headings:mb-3 prose-headings:mt-4 first:prose-headings:mt-0",
-          "prose-p:my-2 prose-p:leading-relaxed",
-          "prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border",
-          "prose-code:bg-muted/50 prose-code:px-1 prose-code:rounded-sm prose-code:border prose-code:border-border",
-          "prose-img:rounded-md prose-img:border prose-img:border-border",
+          "min-h-[200px] rounded-md p-4",
+          "bg-card/50 backdrop-blur-sm border shadow-sm",
+          "transition-colors duration-200",
+          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           format === 'a4' && "aspect-[1/1.4142] w-full",
           format === 'wide' && "aspect-[16/9] w-full"
         )}

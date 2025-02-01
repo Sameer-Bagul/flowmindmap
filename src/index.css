@@ -141,3 +141,70 @@
 .react-flow__handle:hover {
   @apply bg-primary !important;
 }
+
+.ProseMirror {
+  @apply min-h-[200px] outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-muted-foreground float-left h-0 pointer-events-none;
+}
+
+.ProseMirror pre {
+  @apply bg-muted/30 rounded-md border my-4;
+}
+
+.ProseMirror code {
+  @apply font-mono text-sm bg-muted/30 px-1.5 py-0.5 rounded-md border;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-primary/20 pl-4 italic;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  @apply pl-6;
+}
+
+.ProseMirror table {
+  @apply border-collapse w-full my-4;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  @apply border p-2 relative;
+}
+
+.ProseMirror th {
+  @apply bg-muted/30 font-semibold;
+}
+
+.ProseMirror .selectedCell {
+  @apply bg-primary/10;
+}
+
+.ProseMirror img {
+  @apply max-w-full h-auto rounded-md border shadow-sm;
+}
+
+.ProseMirror hr {
+  @apply my-4 border-t-2 border-border;
+}
+
+.ProseMirror mark {
+  @apply bg-yellow-200 dark:bg-yellow-800/50 px-1 rounded-sm;
+}
+
+.ProseMirror [data-task-list] {
+  @apply list-none pl-2;
+}
+
+.ProseMirror [data-task-list] li {
+  @apply flex items-start gap-2;
+}
+
+.ProseMirror [data-task-list] input[type="checkbox"] {
+  @apply mt-1.5;
+}
