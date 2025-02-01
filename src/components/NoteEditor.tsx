@@ -16,6 +16,7 @@ import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { CodeBlock } from './editor/CodeBlock';
+import type { DocumentFormat } from '@/types/node';
 import { 
   Bold, 
   Italic, 
@@ -58,8 +59,7 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
         lowlight,
         HTMLAttributes: {
           class: 'bg-muted/50 rounded-md p-4',
-        },
-        nodeView: CodeBlock,
+        }
       }),
       Underline,
       TextAlign.configure({
