@@ -10,7 +10,7 @@ import {
   Connection,
   ConnectionMode,
   Panel,
-  ReactFlowInstance,
+  Edge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -22,7 +22,6 @@ import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
-import { MediaSidebar } from '@/components/MediaSidebar';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -33,6 +32,7 @@ const defaultEdgeOptions = {
   style: {
     strokeWidth: 2,
     stroke: 'hsl(var(--primary))',
+    cursor: 'pointer',
   },
 };
 
@@ -46,7 +46,7 @@ const Index = () => {
       const newEdge = {
         ...params,
         animated: true,
-        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 }
+        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2, cursor: 'pointer' }
       };
       setEdges((eds) => {
         const update = addEdge(newEdge, eds);
@@ -56,6 +56,21 @@ const Index = () => {
       toast.success('Nodes connected successfully');
     },
     [setEdges, nodes, setElements],
+  );
+
+  const onEdgeClick = useCallback(
+    (_: React.MouseEvent, edge: Edge) => {
+      const isDelete = window.confirm('Do you want to remove this connection?');
+      if (isDelete) {
+        setEdges((eds) => {
+          const update = eds.filter((e) => e.id !== edge.id);
+          setElements(nodes, update);
+          return update;
+        });
+        toast.success('Connection removed successfully');
+      }
+    },
+    [setEdges, nodes, setElements]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -99,7 +114,6 @@ const Index = () => {
 
   return (
     <div className="w-screen h-screen flex bg-background">
-      {/* <MediaSidebar /> */}
       <div className="flex-1">
         <ReactFlow
           nodes={nodes}
@@ -107,6 +121,7 @@ const Index = () => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           connectionMode={ConnectionMode.Loose}
@@ -121,11 +136,18 @@ const Index = () => {
             <FlowToolbar />
             <FlowControls />
             <FlowActions />
-            <Link to="/shortcuts">
-              <Button variant="outline" className="w-full">
-                View Shortcuts
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link to="/roadmaps">
+                <Button variant="outline" className="w-full">
+                  All Roadmaps
+                </Button>
+              </Link>
+              <Link to="/shortcuts">
+                <Button variant="outline" className="w-full">
+                  View Shortcuts
+                </Button>
+              </Link>
+            </div>
           </Panel>
           <Panel position="top-right" className="flex gap-2">
             <ThemeToggle />
