@@ -12,6 +12,12 @@ export type MediaItem = {
 
 export type DocumentFormat = 'default' | 'a4' | 'wide';
 
+export type Tag = {
+  id: string;
+  label: string;
+  color?: string;
+};
+
 export interface HandleData {
   id: string;
   position: Position;
@@ -31,4 +37,5 @@ export interface TextNodeData {
   fontSize?: number;
   lineHeight?: number;
   lastEdited?: Date;
+  tags?: Tag[];
 }

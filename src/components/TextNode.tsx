@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { NoteEditor } from './NoteEditor';
 import { MediaSection } from './nodes/MediaSection';
 import type { TextNodeData, MediaItem } from '../types/node';
+import { TagInput } from './TagInput';
 
 const getDefaultColors = (type: TextNodeData['type']) => {
   switch (type) {
@@ -231,6 +232,42 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             {label || 'Double click to edit'}
           </div>
         )}
+
+        <TagInput
+          tags={data.tags || []}
+          onAddTag={(tag) => {
+            setNodes(nodes => 
+              nodes.map(node => {
+                if (node.id === id) {
+                  return {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      tags: [...(node.data.tags || []), tag]
+                    }
+                  };
+                }
+                return node;
+              })
+            );
+          }}
+          onRemoveTag={(tagId) => {
+            setNodes(nodes => 
+              nodes.map(node => {
+                if (node.id === id) {
+                  return {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      tags: (node.data.tags || []).filter(t => t.id !== tagId)
+                    }
+                  };
+                }
+                return node;
+              })
+            );
+          }}
+        />
 
         <MediaSection 
           media={data.media || []}
