@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import {
   ReactFlow,
@@ -22,6 +23,7 @@ import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
+import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -112,6 +114,19 @@ const Index = () => {
     [nodes.length, setNodes, edges, setElements],
   );
 
+  const handleGeneratedMindmap = (generatedNodes, generatedEdges) => {
+    if (nodes.length > 0 || edges.length > 0) {
+      if (!window.confirm("This will replace your current mindmap. Continue?")) {
+        return;
+      }
+    }
+    
+    setNodes(generatedNodes);
+    setEdges(generatedEdges);
+    setElements(generatedNodes, generatedEdges);
+    toast.success("AI-generated mindmap created successfully!");
+  };
+
   return (
     <div className="w-screen h-screen flex bg-background">
       <div className="flex-1">
@@ -135,8 +150,9 @@ const Index = () => {
           <Panel position="top-left" className="flex flex-col gap-4">
             <FlowToolbar />
             <FlowControls />
-            <FlowActions />
             <div className="flex flex-col gap-2">
+              <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
+              <FlowActions />
               <Link to="/roadmaps">
                 <Button variant="outline" className="w-full">
                   All Roadmaps
