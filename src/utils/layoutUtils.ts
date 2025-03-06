@@ -3,6 +3,8 @@
  * This utility provides functions for automatically laying out nodes in a mindmap
  */
 
+import { Node, Edge } from '@xyflow/react';
+
 export function calculateRadialLayout(count: number, centerX: number, centerY: number, radius: number) {
   const positions = [];
   
@@ -47,7 +49,7 @@ export function calculateTreeLayout(
  * With the main node at the top, subtopics in the second row,
  * and detail nodes arranged in a hierarchical tree below them
  */
-export function calculateHierarchicalTreeLayout(nodes) {
+export function calculateHierarchicalTreeLayout(nodes: Node[]): Node[] {
   // Reset all node positions
   const processedNodes = [...nodes];
   
@@ -63,10 +65,11 @@ export function calculateHierarchicalTreeLayout(nodes) {
   const detailNodes = processedNodes.filter(node => node.type === 'sub-topic');
   
   // Create a map to track which subtopic each detail node belongs to
-  const detailNodeConnections = {};
+  const detailNodeConnections: Record<string, string> = {};
   
   // Find connections between nodes based on edges
-  const edges = processedNodes.filter(node => node.edges).flatMap(node => node.edges) || [];
+  const nodesWithEdges = processedNodes.filter(node => 'edges' in node && Array.isArray(node.edges));
+  const edges: Edge[] = nodesWithEdges.flatMap(node => (node as any).edges || []);
   
   // Map detail nodes to their parent subtopics
   edges.forEach(edge => {
@@ -100,7 +103,7 @@ export function calculateHierarchicalTreeLayout(nodes) {
   });
   
   // Group detail nodes by their parent subtopic
-  const detailNodesBySubtopic = {};
+  const detailNodesBySubtopic: Record<string, Node[]> = {};
   
   detailNodes.forEach(node => {
     const parentId = detailNodeConnections[node.id] || 'unconnected';
@@ -151,7 +154,7 @@ export function calculateHierarchicalTreeLayout(nodes) {
   return [...mainNodes, ...subtopicNodes, ...detailNodes];
 }
 
-export function calculatePositionsForMindmap(nodes) {
+export function calculatePositionsForMindmap(nodes: Node[]): Node[] {
   // First try to use the hierarchical tree layout for a better mindmap structure
   if (Array.isArray(nodes) && nodes.length > 0) {
     return calculateHierarchicalTreeLayout(nodes);
