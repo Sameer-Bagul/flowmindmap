@@ -33,7 +33,7 @@ export const NodeHeader = ({
       <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
         {type.replace('-', ' ')}
       </Badge>
-      <div className="ml-auto hidden">
+      <div className="ml-auto flex items-center">
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

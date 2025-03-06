@@ -24,6 +24,7 @@ import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
+import { Settings } from 'lucide-react';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -166,6 +167,11 @@ const Index = () => {
             </div>
           </Panel>
           <Panel position="top-right" className="flex gap-2">
+            <Link to="/settings">
+              <Button variant="outline" size="icon" className="rounded-full" title="Settings">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </Link>
             <ThemeToggle />
           </Panel>
           <Controls className="bg-background/80 border-border shadow-sm" />

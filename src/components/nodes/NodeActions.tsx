@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Sparkles } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NodeActionsProps {
   isEditMode: boolean;
@@ -16,24 +17,37 @@ export const NodeActions: React.FC<NodeActionsProps> = ({
 }) => {
   return (
     <div className="flex gap-1">
-      <Button 
-        variant="ghost" 
-        size="icon"
-        className="h-8 w-8"
-        onClick={onToggleEditMode}
-        title={isEditMode ? "Collapse node" : "Expand and edit node"}
-      >
-        <Edit className="h-4 w-4" />
-      </Button>
-      <Button 
-        variant="ghost" 
-        size="icon"
-        className="h-8 w-8"
-        onClick={onExpandContent}
-        title="Expand content with AI"
-      >
-        <Sparkles className="h-4 w-4" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8"
+            onClick={onToggleEditMode}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {isEditMode ? "Collapse node" : "Expand and edit node"}
+        </TooltipContent>
+      </Tooltip>
+      
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8"
+            onClick={onExpandContent}
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          Expand content with AI
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 };
