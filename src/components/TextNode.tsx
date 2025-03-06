@@ -2,7 +2,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { NoteEditor } from './NoteEditor';
@@ -10,75 +9,19 @@ import { MediaSection } from './nodes/MediaSection';
 import { TagInput } from './TagInput';
 import { NodeHeader } from './nodes/NodeHeader';
 import { NodeHandles } from './nodes/NodeHandles';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Edit, Sparkles, X } from 'lucide-react';
+import { NodeTitleEditor } from './nodes/NodeTitleEditor';
+import { NodeActions } from './nodes/NodeActions';
+import { NodeViewContent } from './nodes/NodeViewContent';
+import { TagDisplay } from './nodes/TagDisplay';
+import { getDefaultColors } from '@/utils/nodeUtils';
 import type { TextNodeData, MediaItem, Tag } from '../types/node';
 
-const getDefaultColors = (type: TextNodeData['type']) => {
-  switch (type) {
-    case 'chapter':
-      return {
-        bg: 'rgba(254, 243, 199, 0.95)',
-        border: '#f59e0b',
-        badge: 'warning'
-      };
-    case 'main-topic':
-      return {
-        bg: 'rgba(219, 234, 254, 0.95)',
-        border: '#3b82f6',
-        badge: 'secondary'
-      };
-    case 'sub-topic':
-      return {
-        bg: 'rgba(220, 252, 231, 0.95)',
-        border: '#22c55e',
-        badge: 'default'
-      };
-  }
-};
-
 const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
-  const [isLabelEditing, setIsLabelEditing] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [label, setLabel] = useState(data.label || '');
   const { deleteElements, setNodes } = useReactFlow();
   const nodeRef = useRef<HTMLDivElement>(null);
   const defaultColors = getDefaultColors(data.type);
-
-  const handleDoubleClick = useCallback(() => {
-    setIsLabelEditing(true);
-  }, []);
-
-  const handleBlur = useCallback(() => {
-    if (label.trim()) {
-      setIsLabelEditing(false);
-      setNodes(nodes => 
-        nodes.map(node => {
-          if (node.id === id) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                label
-              }
-            };
-          }
-          return node;
-        })
-      );
-    }
-  }, [id, label, setNodes]);
-
-  const handleKeyDown = useCallback(
-    (evt: React.KeyboardEvent) => {
-      if (evt.key === 'Enter') {
-        evt.preventDefault();
-        handleBlur();
-      }
-    },
-    [handleBlur]
-  );
 
   const handleDelete = useCallback(() => {
     deleteElements({ nodes: [{ id }] });
@@ -111,6 +54,24 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             data: {
               ...node.data,
               content
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
+  const handleLabelChange = useCallback((newLabel: string) => {
+    setLabel(newLabel);
+    setNodes(nodes => 
+      nodes.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: newLabel
             }
           };
         }
@@ -200,7 +161,6 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     const currentContent = data.content || '';
     
     // This is a placeholder for AI content generation
-    // In a real implementation, this would call an API to generate content
     toast.promise(
       // Simulate API call with a delay
       new Promise((resolve) => {
@@ -233,60 +193,6 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [data.content, id, setNodes]);
 
-  // Helper function to render YouTube videos
-  const renderYouTubeEmbed = (url: string) => {
-    try {
-      // Extract video ID from YouTube URL
-      const videoId = url.includes('youtu.be')
-        ? url.split('/').pop()
-        : url.includes('v=')
-        ? new URLSearchParams(url.split('?')[1]).get('v')
-        : url;
-
-      return (
-        <div className="aspect-w-16 aspect-h-9 mt-2">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            title="YouTube video"
-            className="w-full h-48 rounded-md"
-            allowFullScreen
-          ></iframe>
-        </div>
-      );
-    } catch (error) {
-      return <div className="text-red-500 text-sm">Invalid YouTube URL</div>;
-    }
-  };
-
-  // Helper function to render media items
-  const renderMediaItem = (item: MediaItem, index: number) => {
-    switch (item.type) {
-      case 'image':
-        return (
-          <div key={index} className="relative rounded-md overflow-hidden mt-2 border border-gray-200">
-            <img src={item.url} alt={item.title || 'Image'} className="w-full h-auto max-h-48 object-cover" />
-            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
-          </div>
-        );
-      case 'youtube':
-        return (
-          <div key={index} className="relative mt-2">
-            {renderYouTubeEmbed(item.url)}
-            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
-          </div>
-        );
-      case 'video':
-        return (
-          <div key={index} className="relative rounded-md overflow-hidden mt-2 border border-gray-200">
-            <video src={item.url} controls className="w-full h-auto max-h-48" />
-            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Card 
       ref={nodeRef}
@@ -316,75 +222,34 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             onDelete={handleDelete}
           />
 
-          <div className="flex gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8"
-              onClick={toggleEditMode}
-              title={isEditMode ? "Collapse node" : "Expand and edit node"}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8"
-              onClick={expandContentWithAI}
-              title="Expand content with AI"
-            >
-              <Sparkles className="h-4 w-4" />
-            </Button>
-          </div>
+          <NodeActions 
+            isEditMode={isEditMode} 
+            onToggleEditMode={toggleEditMode} 
+            onExpandContent={expandContentWithAI} 
+          />
         </div>
 
-        {isLabelEditing ? (
-          <Input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            className="text-xl font-medium bg-white/50 backdrop-blur-sm text-gray-800"
-            placeholder="Enter note title..."
-          />
-        ) : (
-          <div
-            onDoubleClick={handleDoubleClick}
-            className="text-xl font-medium cursor-text select-none min-h-[40px] flex items-center text-gray-800"
-          >
-            {label || 'Double click to edit'}
-          </div>
-        )}
+        <NodeTitleEditor 
+          label={label} 
+          onLabelChange={handleLabelChange} 
+        />
 
-        {/* Display tags in both edit and non-edit mode */}
-        {Array.isArray(data.tags) && data.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {data.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="px-2 py-1 gap-1"
-              >
-                {tag.label}
-                {isEditMode && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => handleRemoveTag(tag.id)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </Badge>
-            ))}
-          </div>
+        {/* Display tags in non-edit mode */}
+        {!isEditMode && Array.isArray(data.tags) && data.tags.length > 0 && (
+          <TagDisplay 
+            tags={data.tags} 
+            isEditMode={false} 
+          />
         )}
 
         {isEditMode ? (
           <>
+            <TagDisplay 
+              tags={Array.isArray(data.tags) ? data.tags : []} 
+              isEditMode={true} 
+              onRemoveTag={handleRemoveTag} 
+            />
+          
             <TagInput
               tags={Array.isArray(data.tags) ? data.tags : []}
               onAddTag={handleAddTag}
@@ -404,23 +269,11 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
             />
           </>
         ) : (
-          <div className="flex flex-col gap-3">
-            {/* Display media items */}
-            {Array.isArray(data.media) && data.media.length > 0 && (
-              <div className="space-y-2">
-                {data.media.map((item, index) => renderMediaItem(item, index))}
-              </div>
-            )}
-            
-            {/* Display content */}
-            <div className="prose prose-sm max-h-[300px] overflow-y-auto">
-              {data.content ? (
-                <div dangerouslySetInnerHTML={{ __html: data.content }} />
-              ) : (
-                <p className="text-gray-400 italic">No content. Click Edit to add content.</p>
-              )}
-            </div>
-          </div>
+          <NodeViewContent 
+            content={data.content}
+            media={data.media}
+            tags={data.tags}
+          />
         )}
       </div>
 
