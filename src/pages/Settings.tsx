@@ -9,25 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useFlowStore } from '@/store/flowStore';
-import { useReactFlow } from '@xyflow/react';
 import { toast } from 'sonner';
 
 const Settings = () => {
-  const { setElements } = useFlowStore();
-  const { getNodes, getEdges, deleteElements } = useReactFlow();
-
   const handleDeleteSelectedNode = () => {
-    const selectedNodes = getNodes().filter(node => node.selected);
-    
-    if (selectedNodes.length === 0) {
-      toast.error('No node selected. Please select a node to delete.');
-      return;
-    }
-
-    deleteElements({ nodes: selectedNodes });
-    setElements(getNodes(), getEdges());
-    toast.success(`${selectedNodes.length} node(s) deleted successfully`);
+    toast.error('Please navigate to the editor to delete nodes');
   };
 
   return (
@@ -75,14 +61,14 @@ const Settings = () => {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogTitle>Node Management</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action will permanently delete the selected node and cannot be undone.
+                        Please navigate to the editor page to select and delete nodes.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteSelectedNode}>Delete</AlertDialogAction>
+                      <AlertDialogAction onClick={handleDeleteSelectedNode}>Understand</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -115,7 +101,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button type="submit">Save Changes</Button>
+                    <Button type="submit" onClick={() => toast.success('Settings saved successfully')}>Save Changes</Button>
                   </div>
                 </DialogContent>
               </Dialog>

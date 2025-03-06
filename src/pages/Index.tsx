@@ -12,6 +12,7 @@ import {
   ConnectionMode,
   Panel,
   Edge,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -39,7 +40,7 @@ const defaultEdgeOptions = {
   },
 };
 
-const Index = () => {
+const FlowContent = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
@@ -129,55 +130,63 @@ const Index = () => {
   };
 
   return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onEdgeClick={onEdgeClick}
+      nodeTypes={nodeTypes}
+      defaultEdgeOptions={defaultEdgeOptions}
+      connectionMode={ConnectionMode.Loose}
+      fitView
+      className="bg-background transition-colors duration-200"
+      minZoom={0.2}
+      maxZoom={4}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
+      <Panel position="top-left" className="flex flex-col gap-4">
+        <FlowToolbar />
+        <FlowControls />
+        <div className="flex flex-col gap-2">
+          <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
+          <FlowActions />
+          <Link to="/roadmaps">
+            <Button variant="outline" className="w-full">
+              All Roadmaps
+            </Button>
+          </Link>
+          <Link to="/shortcuts">
+            <Button variant="outline" className="w-full">
+              View Shortcuts
+            </Button>
+          </Link>
+        </div>
+      </Panel>
+      <Panel position="top-right" className="flex gap-2">
+        <Link to="/settings">
+          <Button variant="outline" size="icon" className="rounded-full" title="Settings">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </Link>
+        <ThemeToggle />
+      </Panel>
+      <Controls className="bg-background/80 border-border shadow-sm" />
+      <MiniMap className="bg-background/80 border-border shadow-sm" />
+      <Background color="#666" gap={16} size={1} />
+    </ReactFlow>
+  );
+};
+
+const Index = () => {
+  return (
     <div className="w-screen h-screen flex bg-background">
       <div className="flex-1">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onEdgeClick={onEdgeClick}
-          nodeTypes={nodeTypes}
-          defaultEdgeOptions={defaultEdgeOptions}
-          connectionMode={ConnectionMode.Loose}
-          fitView
-          className="bg-background transition-colors duration-200"
-          minZoom={0.2}
-          maxZoom={4}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-        >
-          <Panel position="top-left" className="flex flex-col gap-4">
-            <FlowToolbar />
-            <FlowControls />
-            <div className="flex flex-col gap-2">
-              <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
-              <FlowActions />
-              <Link to="/roadmaps">
-                <Button variant="outline" className="w-full">
-                  All Roadmaps
-                </Button>
-              </Link>
-              <Link to="/shortcuts">
-                <Button variant="outline" className="w-full">
-                  View Shortcuts
-                </Button>
-              </Link>
-            </div>
-          </Panel>
-          <Panel position="top-right" className="flex gap-2">
-            <Link to="/settings">
-              <Button variant="outline" size="icon" className="rounded-full" title="Settings">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </Link>
-            <ThemeToggle />
-          </Panel>
-          <Controls className="bg-background/80 border-border shadow-sm" />
-          <MiniMap className="bg-background/80 border-border shadow-sm" />
-          <Background color="#666" gap={16} size={1} />
-        </ReactFlow>
+        <ReactFlowProvider>
+          <FlowContent />
+        </ReactFlowProvider>
       </div>
     </div>
   );
