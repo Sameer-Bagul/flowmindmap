@@ -11,7 +11,8 @@ import { TagInput } from './TagInput';
 import { NodeHeader } from './nodes/NodeHeader';
 import { NodeHandles } from './nodes/NodeHandles';
 import { Button } from './ui/button';
-import { Edit, Sparkles } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Edit, Sparkles, X } from 'lucide-react';
 import type { TextNodeData, MediaItem, Tag } from '../types/node';
 
 const getDefaultColors = (type: TextNodeData['type']) => {
@@ -232,6 +233,60 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     );
   }, [data.content, id, setNodes]);
 
+  // Helper function to render YouTube videos
+  const renderYouTubeEmbed = (url: string) => {
+    try {
+      // Extract video ID from YouTube URL
+      const videoId = url.includes('youtu.be')
+        ? url.split('/').pop()
+        : url.includes('v=')
+        ? new URLSearchParams(url.split('?')[1]).get('v')
+        : url;
+
+      return (
+        <div className="aspect-w-16 aspect-h-9 mt-2">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube video"
+            className="w-full h-48 rounded-md"
+            allowFullScreen
+          ></iframe>
+        </div>
+      );
+    } catch (error) {
+      return <div className="text-red-500 text-sm">Invalid YouTube URL</div>;
+    }
+  };
+
+  // Helper function to render media items
+  const renderMediaItem = (item: MediaItem, index: number) => {
+    switch (item.type) {
+      case 'image':
+        return (
+          <div key={index} className="relative rounded-md overflow-hidden mt-2 border border-gray-200">
+            <img src={item.url} alt={item.title || 'Image'} className="w-full h-auto max-h-48 object-cover" />
+            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
+          </div>
+        );
+      case 'youtube':
+        return (
+          <div key={index} className="relative mt-2">
+            {renderYouTubeEmbed(item.url)}
+            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
+          </div>
+        );
+      case 'video':
+        return (
+          <div key={index} className="relative rounded-md overflow-hidden mt-2 border border-gray-200">
+            <video src={item.url} controls className="w-full h-auto max-h-48" />
+            {item.title && <div className="p-2 text-sm font-medium">{item.title}</div>}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card 
       ref={nodeRef}
@@ -303,7 +358,32 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
           </div>
         )}
 
-        {isEditMode && (
+        {/* Display tags in both edit and non-edit mode */}
+        {Array.isArray(data.tags) && data.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {data.tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="px-2 py-1 gap-1"
+              >
+                {tag.label}
+                {isEditMode && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => handleRemoveTag(tag.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {isEditMode ? (
           <>
             <TagInput
               tags={Array.isArray(data.tags) ? data.tags : []}
@@ -316,22 +396,30 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
               onAddMedia={handleAddMedia}
               onRemoveMedia={handleRemoveMedia}
             />
+            
+            <NoteEditor 
+              content={data.content || ''} 
+              onChange={handleContentChange}
+              autoFocus
+            />
           </>
-        )}
-
-        {isEditMode ? (
-          <NoteEditor 
-            content={data.content || ''} 
-            onChange={handleContentChange}
-            autoFocus
-          />
         ) : (
-          <div className="prose prose-sm max-h-[300px] overflow-y-auto">
-            {data.content ? (
-              <div dangerouslySetInnerHTML={{ __html: data.content }} />
-            ) : (
-              <p className="text-gray-400 italic">No content. Click Edit to add content.</p>
+          <div className="flex flex-col gap-3">
+            {/* Display media items */}
+            {Array.isArray(data.media) && data.media.length > 0 && (
+              <div className="space-y-2">
+                {data.media.map((item, index) => renderMediaItem(item, index))}
+              </div>
             )}
+            
+            {/* Display content */}
+            <div className="prose prose-sm max-h-[300px] overflow-y-auto">
+              {data.content ? (
+                <div dangerouslySetInnerHTML={{ __html: data.content }} />
+              ) : (
+                <p className="text-gray-400 italic">No content. Click Edit to add content.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
