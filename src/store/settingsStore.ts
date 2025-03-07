@@ -1,11 +1,18 @@
+
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface SettingsState {
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
+  theme: 'light' | 'dark' | 'system';
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
-  theme: 'light',
-  setTheme: (theme) => set({ theme }),
-}));
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
+      theme: 'system',
+      setTheme: (theme) => set({ theme }),
+    }),
+    { name: 'settings-storage' }
+  )
+);
