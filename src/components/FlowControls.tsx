@@ -1,137 +1,74 @@
-
 import { Button } from "@/components/ui/button";
-import { 
-  ZoomIn, 
-  ZoomOut, 
-  Maximize2, 
-  Grid3X3, 
-  Save, 
-  Download,
-  Lock, 
-  Unlock,
-  PanelLeftOpen
-} from "lucide-react";
-import { useReactFlow } from '@xyflow/react';
-import { useState } from "react";
+import { Save, Upload, Download } from "lucide-react";
+import { useReactFlow } from "@xyflow/react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 
 export const FlowControls = () => {
-  const { zoomIn, zoomOut, fitView, setCenter } = useReactFlow();
-  const [locked, setLocked] = useState(false);
+  const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
 
-  const handleFitView = () => {
-    fitView({ padding: 0.2, includeHiddenNodes: false });
+  const saveFlow = () => {
+    const flow = { nodes: getNodes(), edges: getEdges() };
+    localStorage.setItem('flow', JSON.stringify(flow));
+    toast.success('Flow saved successfully!');
   };
 
-  const handleToogleLock = () => {
-    setLocked(!locked);
-    toast.success(locked ? 'Canvas unlocked' : 'Canvas locked');
+  const downloadFlow = () => {
+    const flow = { nodes: getNodes(), edges: getEdges() };
+    const blob = new Blob([JSON.stringify(flow, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mindmap-flow.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Flow downloaded successfully!');
   };
 
-  const handleSave = () => {
-    toast.success('Mindmap saved successfully');
-  };
-
-  const handleExport = () => {
-    toast.success('Mindmap exported as image');
-  };
-
-  const centerView = () => {
-    setCenter(0, 0, { zoom: 1, duration: 800 });
+  const uploadFlow = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const flow = JSON.parse(e.target?.result as string);
+          setNodes(flow.nodes || []);
+          setEdges(flow.edges || []);
+          toast.success('Flow imported successfully!');
+        } catch (error) {
+          toast.error('Error importing flow. Invalid JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    }
   };
 
   return (
-    <div className="flow-panel p-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <PanelLeftOpen className="h-4 w-4 text-primary" />
-        <h3 className="font-bold text-foreground/90">Flow Controls</h3>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-2">
-        <Button 
-          onClick={zoomIn} 
-          variant="outline" 
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <ZoomIn className="h-4 w-4" />
-          <span className="text-xs">Zoom In</span>
-        </Button>
-        
-        <Button 
-          onClick={zoomOut} 
-          variant="outline" 
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <ZoomOut className="h-4 w-4" />
-          <span className="text-xs">Zoom Out</span>
-        </Button>
-        
-        <Button 
-          onClick={handleFitView} 
-          variant="outline"
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <Maximize2 className="h-4 w-4" />
-          <span className="text-xs">Fit View</span>
-        </Button>
-        
-        <Button 
-          onClick={centerView} 
-          variant="outline"
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <Grid3X3 className="h-4 w-4" />
-          <span className="text-xs">Center</span>
-        </Button>
-      </div>
-      
-      <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-2">
-        <Button 
-          onClick={handleSave} 
-          variant="outline"
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <Save className="h-4 w-4" />
-          <span className="text-xs">Save</span>
-        </Button>
-        
-        <Button 
-          onClick={handleExport} 
-          variant="outline"
-          size="sm"
-          className="flow-control-button flex gap-2 justify-center"
-        >
-          <Download className="h-4 w-4" />
-          <span className="text-xs">Export</span>
-        </Button>
-      </div>
-      
-      <div className="flex items-center justify-center pt-2">
-        <Button
-          onClick={handleToogleLock}
-          variant="outline"
-          size="sm"
-          className={`flow-control-button gap-2 ${locked ? 'bg-primary/20' : ''}`}
-        >
-          {locked ? (
-            <>
-              <Lock className="h-4 w-4" />
-              <span className="text-xs">Locked</span>
-            </>
-          ) : (
-            <>
-              <Unlock className="h-4 w-4" />
-              <span className="text-xs">Unlocked</span>
-            </>
-          )}
-        </Button>
-      </div>
+    <div className="flex flex-col gap-2">
+      <Button onClick={saveFlow} variant="outline" className="gap-2 justify-start">
+        <Save className="h-4 w-4" />
+        Save Flow
+      </Button>
+      <Button onClick={downloadFlow} variant="outline" className="gap-2 justify-start">
+        <Download className="h-4 w-4" />
+        Download JSON
+      </Button>
+      <Button
+        variant="outline"
+        className="gap-2 justify-start relative"
+        onClick={() => document.getElementById('flow-upload')?.click()}
+      >
+        <Upload className="h-4 w-4" />
+        Upload JSON
+        <input
+          id="flow-upload"
+          type="file"
+          accept=".json"
+          onChange={uploadFlow}
+          className="absolute inset-0 opacity-0 cursor-pointer"
+        />
+      </Button>
     </div>
   );
 };
