@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Trash2, Eraser } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
@@ -27,11 +28,12 @@ export const FlowActions = () => {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col gap-2 bg-background/40 p-4 rounded-xl backdrop-blur-md border shadow-lg">
+      <h3 className="font-semibold text-foreground/80 mb-2">Actions</h3>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="lg" className="gap-2">
-            <Eraser className="h-5 w-5" />
+          <Button variant="destructive" className="gap-2 justify-start w-full h-10">
+            <Eraser className="h-4 w-4" />
             Clear Canvas
           </Button>
         </AlertDialogTrigger>

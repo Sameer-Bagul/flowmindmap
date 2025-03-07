@@ -150,16 +150,17 @@ const FlowContent = () => {
       <Panel position="top-left" className="flex flex-col gap-4">
         <FlowToolbar />
         <FlowControls />
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 bg-background/40 p-4 rounded-xl backdrop-blur-md border shadow-lg">
+          <h3 className="font-semibold text-foreground/80 mb-2">Utilities</h3>
           <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
           <FlowActions />
           <Link to="/roadmaps">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full h-10 gap-2 justify-start">
               All Roadmaps
             </Button>
           </Link>
           <Link to="/shortcuts">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full h-10 gap-2 justify-start">
               View Shortcuts
             </Button>
           </Link>

@@ -45,7 +45,6 @@ export const FlowControls = () => {
     }
   };
 
-  // Wrapper functions to handle the zoom events
   const handleZoomIn = () => {
     zoomIn();
   };
@@ -55,18 +54,19 @@ export const FlowControls = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <Button onClick={saveFlow} variant="outline" className="gap-2 justify-start">
+    <div className="flex flex-col gap-2 bg-background/40 p-4 rounded-xl backdrop-blur-md border shadow-lg">
+      <h3 className="font-semibold text-foreground/80 mb-2">Flow Controls</h3>
+      <Button onClick={saveFlow} variant="outline" className="gap-2 justify-start w-full h-10">
         <Save className="h-4 w-4" />
         Save Flow
       </Button>
-      <Button onClick={downloadFlow} variant="outline" className="gap-2 justify-start">
+      <Button onClick={downloadFlow} variant="outline" className="gap-2 justify-start w-full h-10">
         <Download className="h-4 w-4" />
         Download JSON
       </Button>
       <Button
         variant="outline"
-        className="gap-2 justify-start relative"
+        className="gap-2 justify-start relative w-full h-10"
         onClick={() => document.getElementById('flow-upload')?.click()}
       >
         <Upload className="h-4 w-4" />
@@ -79,11 +79,11 @@ export const FlowControls = () => {
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
       </Button>
-      <Button onClick={handleZoomIn} variant="outline" className="gap-2 justify-start">
+      <Button onClick={handleZoomIn} variant="outline" className="gap-2 justify-start w-full h-10">
         <ZoomIn className="h-4 w-4" />
         Zoom In
       </Button>
-      <Button onClick={handleZoomOut} variant="outline" className="gap-2 justify-start">
+      <Button onClick={handleZoomOut} variant="outline" className="gap-2 justify-start w-full h-10">
         <ZoomOut className="h-4 w-4" />
         Zoom Out
       </Button>
