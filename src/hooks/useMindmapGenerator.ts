@@ -4,7 +4,6 @@ import { AIProvider } from "@/types/aiProviders";
 import { callAIProvider, parseAIResponse } from "@/utils/aiProviderApi";
 import { calculatePositionsForMindmap } from "@/utils/layoutUtils";
 import { toast } from "sonner";
-import { AI_PROVIDERS } from "@/constants/aiProviders";
 
 export function useMindmapGenerator(
   onGenerate: (nodes: any[], edges: any[]) => void,
@@ -68,7 +67,7 @@ The mindmap should include:
 
 Ensure each node has a meaningful label and content. Create logical connections between nodes that form a coherent knowledge structure.`;
 
-      // Call the AI provider
+      // Call the AI provider with properly structured parameters
       const content = await callAIProvider({
         aiProvider,
         serverUrl,
