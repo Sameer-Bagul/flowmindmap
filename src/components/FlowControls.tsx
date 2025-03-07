@@ -41,15 +41,6 @@ export const FlowControls = () => {
     setCenter(0, 0, { zoom: 1, duration: 800 });
   };
 
-  // Wrapper functions for zoom to handle button click events
-  const handleZoomIn = () => {
-    zoomIn();
-  };
-
-  const handleZoomOut = () => {
-    zoomOut();
-  };
-
   return (
     <div className="flow-panel p-4 space-y-4">
       <div className="flex items-center gap-2">
@@ -59,7 +50,7 @@ export const FlowControls = () => {
       
       <div className="grid grid-cols-2 gap-2">
         <Button 
-          onClick={handleZoomIn} 
+          onClick={zoomIn} 
           variant="outline" 
           size="sm"
           className="flow-control-button flex gap-2 justify-center"
@@ -69,7 +60,7 @@ export const FlowControls = () => {
         </Button>
         
         <Button 
-          onClick={handleZoomOut} 
+          onClick={zoomOut} 
           variant="outline" 
           size="sm"
           className="flow-control-button flex gap-2 justify-center"

@@ -27,7 +27,6 @@ import { Separator } from "@/components/ui/separator";
 import { Settings, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
 import { AI_PROVIDERS } from "@/constants/aiProviders";
-import { AIProvider } from '@/types/aiProviders';
 
 export function SettingsDrawer() {
   const {

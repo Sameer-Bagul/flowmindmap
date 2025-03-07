@@ -3,21 +3,9 @@ import { AIProvider } from "@/types/aiProviders";
 import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
 
-interface AIProviderParams {
-  aiProvider: AIProvider;
-  serverUrl: string;
-  selectedModel: string;
-  apiKey: string;
-  prompt: string;
-}
-
-export async function callAIProvider({
-  aiProvider,
-  serverUrl,
-  selectedModel,
-  apiKey,
-  prompt
-}: AIProviderParams) {
+export async function callAIProvider(prompt: string) {
+  const { aiProvider, serverUrl, selectedModel, apiKey } = useSettingsStore.getState();
+  
   let response;
   let result;
 

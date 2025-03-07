@@ -33,7 +33,7 @@ export function useMindmapGenerator(
     try {
       setLoading(true);
       
-      const promptText = `Create a comprehensive and structured mindmap about "${topic}". ${additionalContext ? `Additional context: ${additionalContext}` : ""}
+      const prompt = `Create a comprehensive and structured mindmap about "${topic}". ${additionalContext ? `Additional context: ${additionalContext}` : ""}
       
 The response should be valid JSON matching this structure:
 {
@@ -68,13 +68,13 @@ The mindmap should include:
 
 Ensure each node has a meaningful label and content. Create logical connections between nodes that form a coherent knowledge structure.`;
 
-      // Call the AI provider with updated parameter structure
+      // Call the AI provider
       const content = await callAIProvider({
         aiProvider,
         serverUrl,
         selectedModel,
         apiKey,
-        prompt: promptText
+        prompt
       });
       
       // Parse the response
