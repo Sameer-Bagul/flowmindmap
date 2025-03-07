@@ -25,7 +25,8 @@ import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
-import { Settings } from 'lucide-react';
+import { SettingsDrawer } from '@/components/SettingsDrawer';
+import { useSettingsStore } from '@/store/settingsStore';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -44,6 +45,8 @@ const FlowContent = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
+  // Get API values from settings store
+  const { apiKey, serverUrl, selectedModel, aiProvider } = useSettingsStore();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -150,27 +153,23 @@ const FlowContent = () => {
       <Panel position="top-left" className="flex flex-col gap-4">
         <FlowToolbar />
         <FlowControls />
-        <div className="flex flex-col gap-2">
+        <div className="flow-panel p-4 space-y-3">
           <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
           <FlowActions />
-          <Link to="/roadmaps">
-            <Button variant="outline" className="w-full">
+          <Link to="/roadmaps" className="block w-full">
+            <Button variant="outline" className="w-full bg-white/80 dark:bg-zinc-800/80 border border-primary/20 hover:bg-primary/10 hover:border-primary">
               All Roadmaps
             </Button>
           </Link>
-          <Link to="/shortcuts">
-            <Button variant="outline" className="w-full">
+          <Link to="/shortcuts" className="block w-full">
+            <Button variant="outline" className="w-full bg-white/80 dark:bg-zinc-800/80 border border-primary/20 hover:bg-primary/10 hover:border-primary">
               View Shortcuts
             </Button>
           </Link>
         </div>
       </Panel>
-      <Panel position="top-right" className="flex gap-2">
-        <Link to="/settings">
-          <Button variant="outline" size="icon" className="rounded-full" title="Settings">
-            <Settings className="h-4 w-4" />
-          </Button>
-        </Link>
+      <Panel position="top-right" className="flex gap-2 m-4">
+        <SettingsDrawer />
         <ThemeToggle />
       </Panel>
       <Controls className="bg-background/80 border-border shadow-sm" />

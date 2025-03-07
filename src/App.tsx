@@ -9,7 +9,6 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Roadmaps from "./pages/Roadmaps";
 import Shortcuts from "./pages/Shortcuts";
-import Settings from "./pages/Settings";
 
 function App() {
   const [queryClient] = useState(() => new QueryClient({
@@ -30,7 +29,6 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/roadmaps" element={<Roadmaps />} />
               <Route path="/shortcuts" element={<Shortcuts />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster />

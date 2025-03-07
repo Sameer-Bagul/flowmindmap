@@ -1,178 +1,173 @@
 
 import { AIProvider } from "@/types/aiProviders";
 import { toast } from "sonner";
+import { useSettingsStore } from "@/store/settingsStore";
 
-type AIRequestParams = {
-  aiProvider: AIProvider;
-  serverUrl: string;
-  selectedModel: string;
-  apiKey: string;
-  prompt: string;
-};
-
-export async function callAIProvider({
-  aiProvider,
-  serverUrl,
-  selectedModel,
-  apiKey,
-  prompt
-}: AIRequestParams) {
+export async function callAIProvider(prompt: string) {
+  const { aiProvider, serverUrl, selectedModel, apiKey } = useSettingsStore.getState();
+  
   let response;
   let result;
 
-  switch (aiProvider) {
-    case 'lmstudio':
-      response = await fetch(serverUrl + "/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error connecting to LM Studio: ${response.statusText}`);
-      }
-      
-      result = await response.json();
-      break;
-
-    case 'ollama':
-      response = await fetch(serverUrl + "/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error connecting to Ollama: ${response.statusText}`);
-      }
-      
-      result = await response.json();
-      break;
-
-    case 'gemini':
-      if (!apiKey) {
-        throw new Error("API key is required for Gemini");
-      }
-      
-      response = await fetch(`${serverUrl}/v1beta/models/${selectedModel}:generateContent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `You are a helpful AI assistant that creates detailed mindmaps in JSON format. ${prompt}`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
+  try {
+    switch (aiProvider) {
+      case 'lmstudio':
+        response = await fetch(serverUrl + "/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
+              },
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
             temperature: 0.7,
-            maxOutputTokens: 4000
-          }
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error connecting to Gemini API: ${response.statusText}`);
-      }
-      
-      const geminiResult = await response.json();
-      result = {
-        choices: [
-          {
-            message: {
-              content: geminiResult.candidates[0].content.parts[0].text
+            max_tokens: 4000
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error connecting to LM Studio: ${response.statusText}`);
+        }
+        
+        result = await response.json();
+        break;
+
+      case 'ollama':
+        response = await fetch(serverUrl + "/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
+              },
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error connecting to Ollama: ${response.statusText}`);
+        }
+        
+        result = await response.json();
+        break;
+
+      case 'gemini':
+        if (!apiKey) {
+          throw new Error("API key is required for Gemini");
+        }
+        
+        response = await fetch(`${serverUrl}/v1beta/models/${selectedModel}:generateContent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `You are a helpful AI assistant that creates detailed mindmaps in JSON format. ${prompt}`
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4000
             }
-          }
-        ]
-      };
-      break;
-
-    case 'grok':
-      if (!apiKey) {
-        throw new Error("API key is required for Grok API");
-      }
-      
-      response = await fetch(`${serverUrl}/v1/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error connecting to Gemini API: ${response.statusText}`);
+        }
+        
+        const geminiResult = await response.json();
+        result = {
+          choices: [
             {
-              role: "system",
-              content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
-            },
-            {
-              role: "user",
-              content: prompt
+              message: {
+                content: geminiResult.candidates[0].content.parts[0].text
+              }
             }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error connecting to Grok API: ${response.statusText}`);
-      }
-      
-      result = await response.json();
-      break;
+          ]
+        };
+        break;
 
-    default:
-      throw new Error(`Unsupported AI provider: ${aiProvider}`);
-  }
-  
-  // Extract the content from the response
-  const content = result.choices[0]?.message?.content;
-  
-  if (!content) {
-    throw new Error(`No content returned from the AI provider`);
-  }
+      case 'grok':
+        if (!apiKey) {
+          throw new Error("API key is required for Grok API");
+        }
+        
+        response = await fetch(`${serverUrl}/v1/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful AI assistant that creates detailed mindmaps in JSON format."
+              },
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error connecting to Grok API: ${response.statusText}`);
+        }
+        
+        result = await response.json();
+        break;
 
-  return content;
+      default:
+        throw new Error(`Unsupported AI provider: ${aiProvider}`);
+    }
+    
+    // Extract the content from the response
+    const content = result.choices[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error(`No content returned from the AI provider`);
+    }
+
+    return content;
+  } catch (error) {
+    console.error("Error calling AI provider:", error);
+    toast.error(`API error: ${error.message}`);
+    throw error;
+  }
 }
 
 export function parseAIResponse(content: string) {

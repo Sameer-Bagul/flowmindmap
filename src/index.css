@@ -1,29 +1,30 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83% 53.3%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 217.9 91% 95%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 262.1 83% 58%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --ring: 221.2 83% 53.3%;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -39,7 +40,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262.1 83% 58%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -207,4 +208,55 @@
 
 .ProseMirror [data-task-list] input[type="checkbox"] {
   @apply mt-1.5;
+}
+
+/* New enhanced styles */
+.flow-panel {
+  @apply bg-gradient-to-br from-white/80 to-white/50 dark:from-zinc-900/80 dark:to-zinc-900/50 
+         backdrop-blur-lg border border-white/30 dark:border-white/10 
+         shadow-lg rounded-xl;
+}
+
+.flow-control-button {
+  @apply bg-white/90 dark:bg-zinc-800/90 border border-primary/20 
+         hover:border-primary/70 hover:bg-primary/10 
+         text-primary transition-all duration-200;
+}
+
+.node-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 245, 255, 0.9));
+}
+
+.dark .node-gradient {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
+}
+
+.chapter-node {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.95), rgba(252, 231, 143, 0.9));
+  @apply border-amber-400;
+}
+
+.main-topic-node {
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.95), rgba(191, 219, 254, 0.9));
+  @apply border-blue-400;
+}
+
+.sub-topic-node {
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.95), rgba(187, 247, 208, 0.9));
+  @apply border-green-400;
+}
+
+.dark .chapter-node {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.95), rgba(146, 64, 14, 0.9));
+  @apply border-amber-500;
+}
+
+.dark .main-topic-node {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(37, 99, 235, 0.9));
+  @apply border-blue-500;
+}
+
+.dark .sub-topic-node {
+  background: linear-gradient(135deg, rgba(22, 101, 52, 0.95), rgba(34, 197, 94, 0.9));
+  @apply border-green-500;
 }
