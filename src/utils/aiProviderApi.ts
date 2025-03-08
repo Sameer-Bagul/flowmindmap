@@ -1,6 +1,5 @@
 
 import { AIProvider } from "@/types/aiProviders";
-import { toast } from "sonner";
 
 type AIRequestParams = {
   aiProvider: AIProvider;
@@ -10,13 +9,8 @@ type AIRequestParams = {
   prompt: string;
 };
 
-export async function callAIProvider({
-  aiProvider,
-  serverUrl,
-  selectedModel,
-  apiKey,
-  prompt
-}: AIRequestParams) {
+export async function callAIProvider(params: AIRequestParams) {
+  const { aiProvider, serverUrl, selectedModel, apiKey, prompt } = params;
   let response;
   let result;
 

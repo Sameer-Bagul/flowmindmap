@@ -1,5 +1,4 @@
-
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -26,6 +25,7 @@ import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
 import { Settings } from 'lucide-react';
+import { SidebarPanel } from '@/components/SidebarPanel';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -45,6 +45,18 @@ const FlowContent = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
 
+  useEffect(() => {
+    if (Array.isArray(nodes) && Array.isArray(edges)) {
+      const cleanNodes = nodes.map(node => ({
+        ...node,
+        data: { ...node.data }
+      }));
+      const cleanEdges = edges.map(edge => ({ ...edge }));
+      
+      setElements(cleanNodes, cleanEdges);
+    }
+  }, [nodes, edges, setElements]);
+
   const onConnect = useCallback(
     (params: Connection) => {
       const newEdge = {
@@ -53,13 +65,13 @@ const FlowContent = () => {
         style: { stroke: 'hsl(var(--primary))', strokeWidth: 2, cursor: 'pointer' }
       };
       setEdges((eds) => {
+        if (!Array.isArray(eds)) return [newEdge];
         const update = addEdge(newEdge, eds);
-        setElements(nodes, update);
         return update;
       });
       toast.success('Nodes connected successfully');
     },
-    [setEdges, nodes, setElements],
+    [setEdges],
   );
 
   const onEdgeClick = useCallback(
@@ -67,14 +79,14 @@ const FlowContent = () => {
       const isDelete = window.confirm('Do you want to remove this connection?');
       if (isDelete) {
         setEdges((eds) => {
+          if (!Array.isArray(eds)) return [];
           const update = eds.filter((e) => e.id !== edge.id);
-          setElements(nodes, update);
           return update;
         });
         toast.success('Connection removed successfully');
       }
     },
-    [setEdges, nodes, setElements]
+    [setEdges]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -89,7 +101,6 @@ const FlowContent = () => {
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
-      // Get the reactflow wrapper bounds
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const position = {
         x: event.clientX - reactFlowBounds.left,
@@ -97,7 +108,7 @@ const FlowContent = () => {
       };
 
       const newNode = {
-        id: `${type}-${nodes.length + 1}`,
+        id: `${type}-${Date.now()}`,
         type,
         position,
         data: { 
@@ -107,27 +118,29 @@ const FlowContent = () => {
       };
 
       setNodes((nds) => {
-        const update = [...nds, newNode];
-        setElements(update, edges);
-        return update;
+        if (!Array.isArray(nds)) return [newNode];
+        return [...nds, newNode];
       });
       toast.success(`Added new ${type.replace('-', ' ')}`);
     },
-    [nodes.length, setNodes, edges, setElements],
+    [setNodes],
   );
 
-  const handleGeneratedMindmap = (generatedNodes, generatedEdges) => {
-    if (nodes.length > 0 || edges.length > 0) {
-      if (!window.confirm("This will replace your current mindmap. Continue?")) {
-        return;
-      }
+  const handleGeneratedMindmap = useCallback((generatedNodes, generatedEdges) => {
+    if ((nodes.length > 0 || edges.length > 0) &&
+        !window.confirm("This will replace your current mindmap. Continue?")) {
+      return;
     }
     
-    setNodes(generatedNodes);
+    const cleanNodes = generatedNodes.map(node => ({
+      ...node,
+      data: { ...node.data }
+    }));
+    
+    setNodes(cleanNodes);
     setEdges(generatedEdges);
-    setElements(generatedNodes, generatedEdges);
     toast.success("AI-generated mindmap created successfully!");
-  };
+  }, [nodes.length, edges.length, setNodes, setEdges]);
 
   return (
     <ReactFlow
@@ -148,22 +161,7 @@ const FlowContent = () => {
       onDrop={onDrop}
     >
       <Panel position="top-left" className="flex flex-col gap-4">
-        <FlowToolbar />
-        <FlowControls />
-        <div className="flex flex-col gap-2">
-          <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
-          <FlowActions />
-          <Link to="/roadmaps">
-            <Button variant="outline" className="w-full">
-              All Roadmaps
-            </Button>
-          </Link>
-          <Link to="/shortcuts">
-            <Button variant="outline" className="w-full">
-              View Shortcuts
-            </Button>
-          </Link>
-        </div>
+        <SidebarPanel />
       </Panel>
       <Panel position="top-right" className="flex gap-2">
         <Link to="/settings">
@@ -172,6 +170,16 @@ const FlowContent = () => {
           </Button>
         </Link>
         <ThemeToggle />
+      </Panel>
+      <Panel position="bottom-left" className="flex gap-4">
+        <FlowControls />
+        <FlowActions />
+        <div className="flex items-center gap-2 bg-background/40 p-2 rounded-xl backdrop-blur-md border shadow-lg">
+          <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
+          <Link to="/roadmaps">
+            <Button variant="outline" size="sm">All Roadmaps</Button>
+          </Link>
+        </div>
       </Panel>
       <Controls className="bg-background/80 border-border shadow-sm" />
       <MiniMap className="bg-background/80 border-border shadow-sm" />

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { BookOpen, ListTodo, FileText } from "lucide-react";
 import type { NoteType } from '../types/node';
@@ -13,8 +14,8 @@ export const FlowToolbar = () => {
       ].map(({ type, icon: Icon, label }) => (
         <Button
           key={type}
-          variant="secondary"
-          className="gap-2 justify-start cursor-grab active:cursor-grabbing bg-white/50 hover:bg-white/70 dark:text-gray-800"
+          variant="outline"
+          className="gap-2 justify-start cursor-grab active:cursor-grabbing hover:bg-accent hover:text-accent-foreground w-full h-10"
           draggable
           onDragStart={(event) => {
             event.dataTransfer.setData('application/reactflow', type);
