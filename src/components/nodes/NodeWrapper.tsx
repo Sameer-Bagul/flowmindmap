@@ -6,20 +6,26 @@ import { NodeHandles } from './NodeHandles';
 
 interface NodeWrapperProps {
   id: string;
-  isEditMode: boolean;
+  isEditMode?: boolean;
   backgroundColor: string;
   borderColor: string;
   isConnectable?: boolean;
   children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  showHandles?: boolean;
 }
 
 export const NodeWrapper: React.FC<NodeWrapperProps> = ({
   id,
-  isEditMode,
+  isEditMode = false,
   backgroundColor,
   borderColor,
   isConnectable,
-  children
+  children,
+  className,
+  style = {},
+  showHandles = true
 }) => {
   return (
     <Card 
@@ -31,18 +37,20 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = ({
         "shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]",
         "hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.47)]",
         "transition-all duration-200",
-        "relative"
+        "relative",
+        className
       )}
       style={{
         backgroundColor,
         borderColor,
+        ...style
       }}
     >
       <div className="h-full flex flex-col gap-4">
         {children}
       </div>
       
-      <NodeHandles id={id} isConnectable={isConnectable} />
+      {showHandles && <NodeHandles id={id} isConnectable={isConnectable} />}
     </Card>
   );
 };

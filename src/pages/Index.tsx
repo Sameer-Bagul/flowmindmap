@@ -24,8 +24,8 @@ import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
-import { NodeShapesPanel } from '@/components/NodeShapesPanel';
 import { Settings } from 'lucide-react';
+import { SidebarPanel } from '@/components/SidebarPanel';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -161,24 +161,7 @@ const FlowContent = () => {
       onDrop={onDrop}
     >
       <Panel position="top-left" className="flex flex-col gap-4">
-        <FlowToolbar />
-        <NodeShapesPanel />
-        <FlowControls />
-        <FlowActions />
-        <div className="flex flex-col gap-2 bg-background/40 p-4 rounded-xl backdrop-blur-md border shadow-lg">
-          <h3 className="font-semibold text-foreground/80 mb-2">Utilities</h3>
-          <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
-          <Link to="/roadmaps">
-            <Button variant="outline" className="w-full h-10 gap-2 justify-start">
-              All Roadmaps
-            </Button>
-          </Link>
-          <Link to="/shortcuts">
-            <Button variant="outline" className="w-full h-10 gap-2 justify-start">
-              View Shortcuts
-            </Button>
-          </Link>
-        </div>
+        <SidebarPanel />
       </Panel>
       <Panel position="top-right" className="flex gap-2">
         <Link to="/settings">
@@ -187,6 +170,16 @@ const FlowContent = () => {
           </Button>
         </Link>
         <ThemeToggle />
+      </Panel>
+      <Panel position="bottom-left" className="flex gap-4">
+        <FlowControls />
+        <FlowActions />
+        <div className="flex items-center gap-2 bg-background/40 p-2 rounded-xl backdrop-blur-md border shadow-lg">
+          <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
+          <Link to="/roadmaps">
+            <Button variant="outline" size="sm">All Roadmaps</Button>
+          </Link>
+        </div>
       </Panel>
       <Controls className="bg-background/80 border-border shadow-sm" />
       <MiniMap className="bg-background/80 border-border shadow-sm" />

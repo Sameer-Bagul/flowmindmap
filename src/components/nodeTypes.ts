@@ -1,6 +1,8 @@
 
 import TextNode from './TextNode';
 import ShapeNode from './ShapeNode';
+import StickyNoteNode from './StickyNoteNode';
+import ArrowNode from './ArrowNode';
 import type { NodeTypes } from '@xyflow/react';
 
 const nodeTypes: NodeTypes = {
@@ -13,6 +15,8 @@ const nodeTypes: NodeTypes = {
   'square': ShapeNode,
   'circle': ShapeNode,
   'triangle': ShapeNode,
+  'sticky-note': StickyNoteNode,
+  'arrow': ArrowNode,
 };
 
 export default nodeTypes;
