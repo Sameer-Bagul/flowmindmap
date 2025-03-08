@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { Node, Edge } from '@xyflow/react';
 
 interface FlowState {
-  history: { nodes: Node[]; edges: Edge[] }[];
+  history: Array<{ nodes: Node[]; edges: Edge[] }>;
   currentIndex: number;
   nodes: Node[];
   edges: Edge[];
@@ -23,11 +23,19 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   canRedo: false,
   setElements: (nodes, edges) => {
     set((state) => {
+      // Create a clean copy without circular references
+      const cleanNodes = nodes.map(node => ({
+        ...node,
+        data: { ...node.data }
+      }));
+      const cleanEdges = edges.map(edge => ({ ...edge }));
+      
       const newHistory = state.history.slice(0, state.currentIndex + 1);
-      newHistory.push({ nodes: [...nodes], edges: [...edges] });
+      newHistory.push({ nodes: cleanNodes, edges: cleanEdges });
+      
       return {
-        nodes,
-        edges,
+        nodes: cleanNodes,
+        edges: cleanEdges,
         history: newHistory,
         currentIndex: newHistory.length - 1,
         canUndo: newHistory.length > 1,
