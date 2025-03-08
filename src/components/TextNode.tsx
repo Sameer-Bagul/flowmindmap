@@ -10,6 +10,7 @@ import { NodeTitleEditor } from './nodes/NodeTitleEditor';
 import { NodeActions } from './nodes/NodeActions';
 import { NodeViewContent } from './nodes/NodeViewContent';
 import { NodeContentEditor } from './nodes/NodeContentEditor';
+import { TagDisplay } from './nodes/TagDisplay';
 import { getDefaultColors } from '@/utils/nodeUtils';
 import type { TextNodeData, MediaItem, Tag } from '../types/node';
 
