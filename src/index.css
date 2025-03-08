@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,63 +6,46 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
+    --primary: 217 91% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -76,8 +58,153 @@
   }
 }
 
-@layer utilities {
-  .clip-path-triangle {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  }
+.react-flow__node {
+  @apply shadow-lg bg-white/80 dark:bg-zinc-900/90 backdrop-blur-xl;
+}
+
+.react-flow__node .node-label {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.react-flow__controls {
+  @apply bg-background/60 backdrop-blur-sm shadow-lg;
+}
+
+.react-flow__controls-button {
+  @apply border-border hover:bg-accent text-foreground;
+}
+
+.react-flow__minimap {
+  @apply bg-background/60 backdrop-blur-sm border rounded-lg overflow-hidden;
+}
+
+.react-flow__minimap-mask {
+  @apply fill-muted/30;
+}
+
+.react-flow__attribution {
+  @apply hidden;
+}
+
+.dark .react-flow__edge-path {
+  @apply stroke-primary/70;
+}
+
+.dark .react-flow__controls-button {
+  @apply border-border/50 bg-background/80 text-foreground;
+}
+
+.react-flow__edge {
+  @apply transition-all duration-200;
+}
+
+.react-flow__edge:hover {
+  @apply stroke-[3px];
+}
+
+.react-flow__edge-path {
+  @apply stroke-[2px];
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  @apply stroke-primary stroke-[3px];
+}
+
+.prose {
+  @apply max-w-none;
+}
+
+.dark .prose {
+  @apply text-foreground;
+}
+
+.node-label {
+  @apply text-foreground font-medium;
+}
+
+.dark .node-label {
+  @apply text-gray-100;
+}
+
+.glass-morphism {
+  @apply bg-white/20 dark:bg-zinc-900/20 backdrop-blur-lg border border-white/30 dark:border-white/10;
+}
+
+.react-flow__handle {
+  @apply opacity-100 !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: hsl(var(--primary)) !important;
+  border: 2px solid white !important;
+}
+
+.react-flow__handle:hover {
+  @apply bg-primary !important;
+}
+
+.ProseMirror {
+  @apply min-h-[200px] outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-muted-foreground float-left h-0 pointer-events-none;
+}
+
+.ProseMirror pre {
+  @apply bg-zinc-900 rounded-md border border-zinc-700 my-4 text-zinc-100;
+}
+
+.ProseMirror code {
+  @apply font-mono text-sm bg-zinc-800 px-1.5 py-0.5 rounded-md border border-zinc-700 text-zinc-100;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-primary/20 pl-4 italic;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  @apply pl-6;
+}
+
+.ProseMirror table {
+  @apply border-collapse w-full my-4;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  @apply border p-2 relative;
+}
+
+.ProseMirror th {
+  @apply bg-muted/30 font-semibold;
+}
+
+.ProseMirror .selectedCell {
+  @apply bg-primary/10;
+}
+
+.ProseMirror img {
+  @apply max-w-full h-auto rounded-md border shadow-sm;
+}
+
+.ProseMirror hr {
+  @apply my-4 border-t-2 border-border;
+}
+
+.ProseMirror mark {
+  @apply bg-yellow-200 dark:bg-yellow-800/50 px-1 rounded-sm;
+}
+
+.ProseMirror [data-task-list] {
+  @apply list-none pl-2;
+}
+
+.ProseMirror [data-task-list] li {
+  @apply flex items-start gap-2;
+}
+
+.ProseMirror [data-task-list] input[type="checkbox"] {
+  @apply mt-1.5;
 }

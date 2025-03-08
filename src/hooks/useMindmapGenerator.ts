@@ -4,6 +4,7 @@ import { AIProvider } from "@/types/aiProviders";
 import { callAIProvider, parseAIResponse } from "@/utils/aiProviderApi";
 import { calculatePositionsForMindmap } from "@/utils/layoutUtils";
 import { toast } from "sonner";
+import { AI_PROVIDERS } from "@/constants/aiProviders";
 
 export function useMindmapGenerator(
   onGenerate: (nodes: any[], edges: any[]) => void,
@@ -32,9 +33,9 @@ export function useMindmapGenerator(
     try {
       setLoading(true);
       
-      const prompt = `Create a mindmap about "${topic}". ${additionalContext ? `Additional context: ${additionalContext}` : ""}
+      const prompt = `Create a comprehensive and structured mindmap about "${topic}". ${additionalContext ? `Additional context: ${additionalContext}` : ""}
       
-Return valid JSON matching this structure:
+The response should be valid JSON matching this structure:
 {
   "nodes": [
     {
@@ -50,7 +51,7 @@ Return valid JSON matching this structure:
   ],
   "edges": [
     {
-      "id": "edge-1",
+      "id": "edge-1-2",
       "source": "chapter-1",
       "target": "main-topic-1",
       "animated": true
@@ -58,13 +59,16 @@ Return valid JSON matching this structure:
   ]
 }
 
-Include:
+IMPORTANT: Do not include position information in the nodes, as the layout will be calculated automatically.
+
+The mindmap should include:
 - 1 chapter node as the main topic
-- 2-4 main-topic nodes for key subtopics
-- 3-6 sub-topic nodes for details
+- 4-6 main-topic nodes for key subtopics
+- 6-12 sub-topic nodes for details
 
-Use simple, short labels and content for each node.`;
+Ensure each node has a meaningful label and content. Create logical connections between nodes that form a coherent knowledge structure.`;
 
+      // Call the AI provider
       const content = await callAIProvider({
         aiProvider,
         serverUrl,
@@ -73,28 +77,16 @@ Use simple, short labels and content for each node.`;
         prompt
       });
       
-      let mindmapData;
-      try {
-        mindmapData = parseAIResponse(content);
-        
-        // Validate the structure
-        if (!mindmapData.nodes || !Array.isArray(mindmapData.nodes) || 
-            !mindmapData.edges || !Array.isArray(mindmapData.edges)) {
-          throw new Error("Invalid mindmap structure");
-        }
-        
-        // Calculate positions for the nodes
-        const positionedNodes = calculatePositionsForMindmap(mindmapData.nodes);
-        
-        // Apply the generated mindmap
-        onGenerate(positionedNodes, mindmapData.edges);
-        toast.success("Mindmap generated successfully!");
-        onClose();
-      } catch (parseError) {
-        console.error("Error parsing AI response:", parseError);
-        console.error("Raw response:", content);
-        toast.error("Failed to parse AI response. Try again or use simpler prompt.");
-      }
+      // Parse the response
+      const mindmapData = parseAIResponse(content);
+      
+      // Calculate positions for the nodes
+      const positionedNodes = calculatePositionsForMindmap(mindmapData.nodes);
+      
+      // Apply the generated mindmap
+      onGenerate(positionedNodes, mindmapData.edges);
+      toast.success("Mindmap generated successfully!");
+      onClose();
       
     } catch (error: any) {
       console.error("Error generating mindmap:", error);
