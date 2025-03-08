@@ -1,17 +1,15 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { NoteEditor } from './NoteEditor';
-import { MediaSection } from './nodes/MediaSection';
-import { TagInput } from './TagInput';
 import { NodeHeader } from './nodes/NodeHeader';
 import { NodeHandles } from './nodes/NodeHandles';
 import { NodeTitleEditor } from './nodes/NodeTitleEditor';
 import { NodeActions } from './nodes/NodeActions';
 import { NodeViewContent } from './nodes/NodeViewContent';
-import { TagDisplay } from './nodes/TagDisplay';
+import { NodeContentEditor } from './nodes/NodeContentEditor';
 import { getDefaultColors } from '@/utils/nodeUtils';
 import type { TextNodeData, MediaItem, Tag } from '../types/node';
 
@@ -242,31 +240,16 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
         )}
 
         {isEditMode ? (
-          <>
-            <TagDisplay 
-              tags={Array.isArray(data.tags) ? data.tags : []} 
-              isEditMode={true} 
-              onRemoveTag={handleRemoveTag} 
-            />
-          
-            <TagInput
-              tags={Array.isArray(data.tags) ? data.tags : []}
-              onAddTag={handleAddTag}
-              onRemoveTag={handleRemoveTag}
-            />
-
-            <MediaSection 
-              media={Array.isArray(data.media) ? data.media : []}
-              onAddMedia={handleAddMedia}
-              onRemoveMedia={handleRemoveMedia}
-            />
-            
-            <NoteEditor 
-              content={data.content || ''} 
-              onChange={handleContentChange}
-              autoFocus
-            />
-          </>
+          <NodeContentEditor 
+            content={data.content || ''}
+            media={Array.isArray(data.media) ? data.media : []}
+            tags={Array.isArray(data.tags) ? data.tags : []}
+            onContentChange={handleContentChange}
+            onAddMedia={handleAddMedia}
+            onRemoveMedia={handleRemoveMedia}
+            onAddTag={handleAddTag}
+            onRemoveTag={handleRemoveTag}
+          />
         ) : (
           <NodeViewContent 
             content={data.content}
