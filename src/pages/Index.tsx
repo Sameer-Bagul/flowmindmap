@@ -25,6 +25,7 @@ import { useFlowStore } from '@/store/flowStore';
 import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
+import { NodeShapesPanel } from '@/components/NodeShapesPanel';
 import { Settings } from 'lucide-react';
 
 const initialNodes = [];
@@ -149,11 +150,12 @@ const FlowContent = () => {
     >
       <Panel position="top-left" className="flex flex-col gap-4">
         <FlowToolbar />
+        <NodeShapesPanel />
         <FlowControls />
+        <FlowActions />
         <div className="flex flex-col gap-2 bg-background/40 p-4 rounded-xl backdrop-blur-md border shadow-lg">
           <h3 className="font-semibold text-foreground/80 mb-2">Utilities</h3>
           <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
-          <FlowActions />
           <Link to="/roadmaps">
             <Button variant="outline" className="w-full h-10 gap-2 justify-start">
               All Roadmaps
