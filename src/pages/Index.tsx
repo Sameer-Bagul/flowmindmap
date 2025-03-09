@@ -19,10 +19,8 @@ import { Button } from "@/components/ui/button";
 import nodeTypes from '../components/nodeTypes';
 import { toast } from "sonner";
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { FlowControls } from '@/components/FlowControls';
 import { useFlowStore } from '@/store/flowStore';
-import { FlowToolbar } from '@/components/FlowToolbar';
-import { FlowActions } from '@/components/FlowActions';
+import { MiniFlowControls } from '@/components/MiniFlowControls';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
 import { Settings } from 'lucide-react';
 import { SidebarPanel } from '@/components/SidebarPanel';
@@ -171,13 +169,12 @@ const FlowContent = () => {
         </Link>
         <ThemeToggle />
       </Panel>
-      <Panel position="bottom-left" className="flex gap-4">
-        <FlowControls />
-        <FlowActions />
+      <Panel position="bottom-left" className="flex gap-2">
+        <MiniFlowControls />
         <div className="flex items-center gap-2 bg-background/40 p-2 rounded-xl backdrop-blur-md border shadow-lg">
           <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
           <Link to="/roadmaps">
-            <Button variant="outline" size="sm">All Roadmaps</Button>
+            <Button variant="outline" size="sm">Roadmaps</Button>
           </Link>
         </div>
       </Panel>
