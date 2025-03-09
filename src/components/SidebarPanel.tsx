@@ -1,47 +1,12 @@
 
 import { useState, useCallback } from 'react';
-import { Button } from "@/components/ui/button";
-import { 
-  MenuSquare, CircleIcon, Triangle, ArrowRight, StickyNote, 
-  FileText, BookOpen, ListTodo, Text, Image, Table, 
-  Save, Download, Upload, Palette, X, ChevronDown, ChevronUp
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useReactFlow } from "@xyflow/react";
-import { toast } from "sonner";
-import type { NoteType } from '../types/node';
-
-// Memoized NodeButton component to prevent unnecessary re-renders
-const NodeButton = ({ type, icon: Icon, label }: { type: NoteType; icon: React.ElementType; label: string }) => {
-  const handleDragStart = useCallback((event: React.DragEvent) => {
-    event.dataTransfer.setData('application/reactflow', type);
-    event.dataTransfer.effectAllowed = 'move';
-  }, [type]);
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="glass-icon"
-          size="icon"
-          className="h-10 w-10 mb-2 cursor-grab active:cursor-grabbing"
-          draggable
-          onDragStart={handleDragStart}
-        >
-          <Icon className="h-4 w-4" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="right">
-        <p>{label}</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-};
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ToggleButton } from './sidebar/ToggleButton';
+import { DocumentNodes } from './sidebar/DocumentNodes';
+import { ShapeNodes } from './sidebar/ShapeNodes';
+import { SpecialNodes } from './sidebar/SpecialNodes';
+import { ContentNodes } from './sidebar/ContentNodes';
+import { SidebarActions } from './sidebar/SidebarActions';
 
 // Theme options defined outside component to prevent recreation on each render
 const THEMES = [
@@ -56,64 +21,9 @@ const THEMES = [
 export const SidebarPanel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(0);
-  const reactFlowInstance = useReactFlow();
   
-  // Extract methods using destructuring to prevent infinite re-renders
-  const { getNodes, getEdges, setNodes, setEdges } = reactFlowInstance;
-
   const toggleExpanded = useCallback(() => {
     setIsExpanded(prev => !prev);
-  }, []);
-  
-  const saveFlow = useCallback(() => {
-    const flow = { nodes: getNodes(), edges: getEdges() };
-    localStorage.setItem('flow', JSON.stringify(flow));
-    toast.success('Flow saved successfully!');
-  }, [getNodes, getEdges]);
-
-  const downloadFlow = useCallback(() => {
-    const flow = { nodes: getNodes(), edges: getEdges() };
-    const blob = new Blob([JSON.stringify(flow, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'mindmap-flow.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success('Flow downloaded successfully!');
-  }, [getNodes, getEdges]);
-
-  const uploadFlow = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const flow = JSON.parse(e.target?.result as string);
-          setNodes(flow.nodes || []);
-          setEdges(flow.edges || []);
-          toast.success('Flow imported successfully!');
-        } catch (error) {
-          toast.error('Error importing flow. Invalid JSON file.');
-        }
-      };
-      reader.readAsText(file);
-    }
-  }, [setNodes, setEdges]);
-
-  const clearFlow = useCallback(() => {
-    if (window.confirm('Are you sure you want to clear the flow?')) {
-      setNodes([]);
-      setEdges([]);
-      toast.success('Flow cleared successfully');
-    }
-  }, [setNodes, setEdges]);
-
-  const changeTheme = useCallback(() => {
-    setCurrentTheme(prev => (prev + 1) % THEMES.length);
-    toast.success('Theme changed!');
   }, []);
 
   return (
@@ -122,109 +32,22 @@ export const SidebarPanel = () => {
         className="flex flex-col items-center p-3 rounded-xl backdrop-blur-lg z-10 border border-white/20 shadow-lg"
         style={{ background: THEMES[currentTheme] }}
       >
-        <Button 
-          variant="glass-icon"
-          size="icon"
-          className="mb-3"
-          onClick={toggleExpanded}
-        >
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </Button>
+        <ToggleButton isExpanded={isExpanded} onClick={toggleExpanded} />
 
         {isExpanded && (
           <>
-            <div className="mb-3">
-              <h6 className="text-xs text-white/80 font-semibold mb-2 text-center">Documents</h6>
-              <NodeButton type="chapter" icon={BookOpen} label="Chapter" />
-              <NodeButton type="main-topic" icon={ListTodo} label="Main Topic" />
-              <NodeButton type="sub-topic" icon={FileText} label="Sub Topic" />
-            </div>
-
-            <div className="mb-3">
-              <h6 className="text-xs text-white/80 font-semibold mb-2 text-center">Shapes</h6>
-              <NodeButton type="square" icon={MenuSquare} label="Square" />
-              <NodeButton type="circle" icon={CircleIcon} label="Circle" />
-              <NodeButton type="triangle" icon={Triangle} label="Triangle" />
-            </div>
-
-            <div className="mb-3">
-              <h6 className="text-xs text-white/80 font-semibold mb-2 text-center">Specials</h6>
-              <NodeButton type="sticky-note" icon={StickyNote} label="Sticky Note" />
-              <NodeButton type="arrow" icon={ArrowRight} label="Arrow" />
-            </div>
-
-            <div className="mb-3">
-              <h6 className="text-xs text-white/80 font-semibold mb-2 text-center">Content</h6>
-              <NodeButton type="text" icon={Text} label="Text Block" />
-              <NodeButton type="image" icon={Image} label="Image" />
-              <NodeButton type="table" icon={Table} label="Table" />
-            </div>
+            <DocumentNodes />
+            <ShapeNodes />
+            <SpecialNodes />
+            <ContentNodes />
           </>
         )}
 
         <div className="pt-2 border-t border-white/20">
-          <h6 className="text-xs text-white/80 font-semibold mb-2 text-center">Actions</h6>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button onClick={saveFlow} variant="glass-icon" size="icon" className="mb-2">
-                <Save className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Save Flow</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button onClick={downloadFlow} variant="glass-icon" size="icon" className="mb-2">
-                <Download className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Download JSON</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="glass-icon" size="icon" className="mb-2 relative">
-                <Upload className="h-4 w-4" />
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={uploadFlow}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Upload JSON</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button onClick={changeTheme} variant="glass-icon" size="icon" className="mb-2">
-                <Palette className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Change Theme</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button onClick={clearFlow} variant="glass-icon" size="icon" className="mb-2">
-                <X className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Clear Canvas</p>
-            </TooltipContent>
-          </Tooltip>
+          <SidebarActions 
+            currentTheme={currentTheme}
+            setCurrentTheme={setCurrentTheme}
+          />
         </div>
       </div>
     </TooltipProvider>
