@@ -169,15 +169,15 @@ const FlowContent = () => {
         </Link>
         <ThemeToggle />
       </Panel>
-      <Panel position="bottom-left" className="flex gap-2">
-        <MiniFlowControls />
-        <div className="flex items-center gap-2 bg-background/40 p-2 rounded-xl backdrop-blur-md border shadow-lg">
+      <Panel position="bottom-center" className="flex gap-2">
+        <div className="flex items-center gap-2 backdrop-blur-md border shadow-lg rounded-xl p-2">
           <GenerateMindmapModal onGenerate={handleGeneratedMindmap} />
           <Link to="/roadmaps">
             <Button variant="outline" size="sm">Roadmaps</Button>
           </Link>
         </div>
       </Panel>
+      <MiniFlowControls />
       <Controls className="bg-background/80 border-border shadow-sm" />
       <MiniMap className="bg-background/80 border-border shadow-sm" />
       <Background color="#666" gap={16} size={1} />
