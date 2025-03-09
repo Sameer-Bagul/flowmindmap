@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 import { NodeHeader } from './nodes/NodeHeader';
 import { NodeTitleEditor } from './nodes/NodeTitleEditor';
 import { NodeActions } from './nodes/NodeActions';
@@ -12,7 +12,7 @@ import { useEditMode } from '@/hooks/useEditMode';
 import { getDefaultColors } from '@/utils/nodeUtils';
 import type { TextNodeData } from '../types/node';
 
-const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
+const TextNode = memo(({ id, data, isConnectable }: { id: string, data: TextNodeData; isConnectable?: boolean }) => {
   const [label, setLabel] = useState(data.label || '');
   const { isEditMode, toggleEditMode } = useEditMode(false);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -30,10 +30,10 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
     expandContentWithAI
   } = useNodeData(id);
 
-  const onLabelChange = (newLabel: string) => {
+  const onLabelChange = useCallback((newLabel: string) => {
     setLabel(newLabel);
     handleLabelChange(newLabel);
-  };
+  }, [handleLabelChange]);
 
   return (
     <NodeWrapper
@@ -93,6 +93,8 @@ const TextNode = ({ id, data, isConnectable }: { id: string, data: TextNodeData;
       )}
     </NodeWrapper>
   );
-};
+});
+
+TextNode.displayName = 'TextNode';
 
 export default TextNode;

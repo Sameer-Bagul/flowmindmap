@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from "@/lib/utils";
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,7 @@ interface StickyNoteNodeProps {
   isConnectable?: boolean;
 }
 
-const StickyNoteNode = ({ id, data, isConnectable }: StickyNoteNodeProps) => {
+const StickyNoteNode = memo(({ id, data, isConnectable }: StickyNoteNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(data.content || '');
   const { setNodes, deleteElements } = useReactFlow();
@@ -40,6 +40,10 @@ const StickyNoteNode = ({ id, data, isConnectable }: StickyNoteNodeProps) => {
 
   const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
+  }, []);
+
+  const toggleEditing = useCallback(() => {
+    setIsEditing(prev => !prev);
   }, []);
 
   const saveContent = useCallback(() => {
@@ -90,7 +94,7 @@ const StickyNoteNode = ({ id, data, isConnectable }: StickyNoteNodeProps) => {
             size="icon" 
             variant="ghost" 
             className="h-6 w-6" 
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={toggleEditing}
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -134,6 +138,8 @@ const StickyNoteNode = ({ id, data, isConnectable }: StickyNoteNodeProps) => {
       <NodeHandles id={id} isConnectable={isConnectable} />
     </Card>
   );
-};
+});
+
+StickyNoteNode.displayName = 'StickyNoteNode';
 
 export default StickyNoteNode;

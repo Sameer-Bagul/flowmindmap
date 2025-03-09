@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -43,16 +43,22 @@ const FlowContent = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { setElements } = useFlowStore();
 
+  // Use useMemo for complex objects to prevent recreations
+  const reactFlowStyle = useMemo(() => ({
+    backgroundColor: 'var(--background)'
+  }), []);
+
   useEffect(() => {
-    if (Array.isArray(nodes) && Array.isArray(edges)) {
-      const cleanNodes = nodes.map(node => ({
-        ...node,
-        data: { ...node.data }
-      }));
-      const cleanEdges = edges.map(edge => ({ ...edge }));
-      
-      setElements(cleanNodes, cleanEdges);
-    }
+    // Only run when nodes or edges change and they're actual arrays
+    if (!Array.isArray(nodes) || !Array.isArray(edges)) return;
+    
+    const cleanNodes = nodes.map(node => ({
+      ...node,
+      data: { ...node.data }
+    }));
+    const cleanEdges = edges.map(edge => ({ ...edge }));
+    
+    setElements(cleanNodes, cleanEdges);
   }, [nodes, edges, setElements]);
 
   const onConnect = useCallback(
@@ -64,8 +70,7 @@ const FlowContent = () => {
       };
       setEdges((eds) => {
         if (!Array.isArray(eds)) return [newEdge];
-        const update = addEdge(newEdge, eds);
-        return update;
+        return addEdge(newEdge, eds);
       });
       toast.success('Nodes connected successfully');
     },
@@ -78,8 +83,7 @@ const FlowContent = () => {
       if (isDelete) {
         setEdges((eds) => {
           if (!Array.isArray(eds)) return [];
-          const update = eds.filter((e) => e.id !== edge.id);
-          return update;
+          return eds.filter((e) => e.id !== edge.id);
         });
         toast.success('Connection removed successfully');
       }
@@ -153,6 +157,7 @@ const FlowContent = () => {
       connectionMode={ConnectionMode.Loose}
       fitView
       className="bg-background transition-colors duration-200"
+      style={reactFlowStyle}
       minZoom={0.2}
       maxZoom={4}
       onDragOver={onDragOver}
@@ -184,6 +189,7 @@ const FlowContent = () => {
   );
 };
 
+// Memoized Index component to prevent unnecessary re-renders
 const Index = () => {
   return (
     <div className="w-screen h-screen flex bg-background">
