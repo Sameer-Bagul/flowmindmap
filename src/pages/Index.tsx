@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
@@ -20,7 +21,6 @@ import nodeTypes from '../components/nodeTypes';
 import { toast } from "sonner";
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useFlowStore } from '@/store/flowStore';
-import { MiniFlowControls } from '@/components/MiniFlowControls';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
 import { Settings } from 'lucide-react';
 import { SidebarPanel } from '@/components/SidebarPanel';
@@ -177,7 +177,6 @@ const FlowContent = () => {
           </Link>
         </div>
       </Panel>
-      <MiniFlowControls />
       <Controls className="bg-background/80 border-border shadow-sm" />
       <MiniMap className="bg-background/80 border-border shadow-sm" />
       <Background color="#666" gap={16} size={1} />

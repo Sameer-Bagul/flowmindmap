@@ -22,6 +22,7 @@ const buttonVariants = cva(
         ai: "bg-green-500 text-white hover:bg-green-600",
         glass: "bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30",
         gradient: "bg-gradient-to-r from-pink-500 to-yellow-500 text-white hover:from-pink-600 hover:to-yellow-600",
+        "glass-icon": "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all rounded-full shadow-lg",
       },
       size: {
         default: "h-10 px-4 py-2",
