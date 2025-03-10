@@ -294,5 +294,4 @@ export const NoteEditor = ({ content, onChange, format = 'default', autoFocus = 
       />
     </div>
   );
-
 };

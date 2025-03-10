@@ -3,8 +3,6 @@
  * This utility provides functions for automatically laying out nodes in a mindmap
  */
 
-import { Node, Edge } from '@xyflow/react';
-
 export function calculateRadialLayout(count: number, centerX: number, centerY: number, radius: number) {
   const positions = [];
   
@@ -44,83 +42,46 @@ export function calculateTreeLayout(
   return positions;
 }
 
-/**
- * Calculates positions for a hierarchical mindmap
- */
-export function calculateHierarchicalTreeLayout(nodes: Node[]): Node[] {
-  // Make a deep copy to avoid modifying the original nodes
-  const processedNodes = nodes.map(node => ({
-    ...node,
-    position: node.position || { x: 0, y: 0 }
-  }));
-  
-  // Constants for layout
+export function calculatePositionsForMindmap(nodes) {
+  // Set the main node (chapter) at the center
   const centerX = 500;
-  const startY = 100;
-  const levelSpacing = 200;
-  const horizontalSpacing = 250;
+  const centerY = 300;
   
-  // Group nodes by type
-  const mainNodes = processedNodes.filter(node => node.type === 'chapter');
-  const subtopicNodes = processedNodes.filter(node => node.type === 'main-topic');
-  const detailNodes = processedNodes.filter(node => node.type === 'sub-topic');
+  // Find the chapter node (main node)
+  const mainNodes = nodes.filter(node => node.type === 'chapter');
+  const subtopicNodes = nodes.filter(node => node.type === 'main-topic');
+  const detailNodes = nodes.filter(node => node.type === 'sub-topic');
   
-  // Create a map for node connections
-  const detailNodeConnections: Record<string, string> = {};
-  
-  // Position main nodes at the top center
+  // Position the main nodes at the center
   mainNodes.forEach((node, i) => {
-    node.position = { 
-      x: centerX - (mainNodes.length - 1) * horizontalSpacing / 2 + i * horizontalSpacing, 
-      y: startY 
-    };
+    node.position = { x: centerX + (i * 300), y: centerY };
   });
   
-  // Position subtopic nodes in the second row, evenly spaced
-  const subtopicWidth = Math.max(1, subtopicNodes.length) * horizontalSpacing;
-  const subtopicStartX = centerX - subtopicWidth / 2 + horizontalSpacing / 2;
+  // Position subtopic nodes in a circle around the main node
+  const subtopicPositions = calculateRadialLayout(
+    subtopicNodes.length, 
+    centerX, 
+    centerY, 
+    300 // radius
+  );
   
   subtopicNodes.forEach((node, i) => {
-    node.position = { 
-      x: subtopicStartX + i * horizontalSpacing, 
-      y: startY + levelSpacing 
-    };
+    node.position = subtopicPositions[i];
   });
   
-  // Position detail nodes below in a grid
-  const detailsPerRow = 4;
-  const detailStartX = centerX - ((Math.min(detailsPerRow, detailNodes.length) - 1) / 2) * horizontalSpacing;
+  // Position detail nodes in a tree layout
+  const detailPositions = calculateTreeLayout(
+    detailNodes.length,
+    centerX - 600,
+    centerY + 300,
+    300,
+    150,
+    5
+  );
   
   detailNodes.forEach((node, i) => {
-    const row = Math.floor(i / detailsPerRow);
-    const col = i % detailsPerRow;
-    node.position = { 
-      x: detailStartX + col * horizontalSpacing, 
-      y: startY + levelSpacing * 2 + row * levelSpacing 
-    };
+    node.position = detailPositions[i];
   });
   
   return [...mainNodes, ...subtopicNodes, ...detailNodes];
-}
-
-export function calculatePositionsForMindmap(nodes: Node[]): Node[] {
-  if (!Array.isArray(nodes) || nodes.length === 0) {
-    return [];
-  }
-  
-  try {
-    // Try the hierarchical layout first
-    return calculateHierarchicalTreeLayout(nodes);
-  } catch (error) {
-    console.error("Error in hierarchical layout, falling back to basic layout:", error);
-    
-    // Fallback to simple layout
-    const centerX = 500;
-    const centerY = 300;
-    
-    return nodes.map((node, index) => ({
-      ...node,
-      position: { x: centerX + (index * 200), y: centerY + (index % 3) * 100 }
-    }));
-  }
 }

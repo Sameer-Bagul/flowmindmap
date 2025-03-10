@@ -1,4 +1,3 @@
-
 import { Position } from '@xyflow/react';
 
 export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';

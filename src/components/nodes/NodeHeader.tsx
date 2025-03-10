@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Settings2, Trash2 } from "lucide-react";
@@ -29,11 +28,11 @@ export const NodeHeader = ({
   onDelete
 }: NodeHeaderProps) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center justify-between">
       <Badge variant={defaultColors.badge as any} className="capitalize backdrop-blur-sm">
         {type.replace('-', ' ')}
       </Badge>
-      <div className="ml-auto flex items-center">
+      <div className="flex gap-2 items-center">
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

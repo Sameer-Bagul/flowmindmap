@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -6,20 +5,15 @@ import { cn } from "@/lib/utils";
 const colors = [
   "#FFFFFF", // Pure white
   "#F8F9FA", // Slightly off-white
-  "#E5DEFF", // Soft purple
-  "#D3E4FD", // Soft blue
+  "#1EAEDB", // Bright blue
+  "#33C3F0", // Sky blue
   "#F2FCE2", // Soft green
   "#FEF7CD", // Soft yellow
   "#FEC6A1", // Soft orange
+  "#E5DEFF", // Soft purple
   "#FFDEE2", // Soft pink
   "#FDE1D3", // Soft peach
-  "#1EAEDB", // Bright blue
-  "#33C3F0", // Sky blue
-  "#9b87f5", // Primary Purple
-  "#8B5CF6", // Vivid Purple
-  "#F97316", // Bright Orange
-  "#D946EF", // Magenta Pink
-  "#0EA5E9", // Ocean Blue
+  "#D3E4FD", // Soft blue
 ];
 
 interface ColorPickerProps {
@@ -40,13 +34,13 @@ export const ColorPicker = ({ value = "#000000", onChange }: ColorPickerProps) =
           }}
         />
       </PopoverTrigger>
-      <PopoverContent className="w-[240px] p-3">
-        <div className="grid grid-cols-4 gap-2">
+      <PopoverContent className="w-[12rem] p-2">
+        <div className="grid grid-cols-4 gap-1">
           {colors.map((color) => (
             <button
               key={color}
               className={cn(
-                "w-12 h-12 rounded-md transition-all duration-200 hover:scale-105",
+                "w-8 h-8 rounded-md transition-all duration-200 hover:scale-105",
                 "border border-border",
                 value === color && "ring-2 ring-primary ring-offset-2"
               )}
