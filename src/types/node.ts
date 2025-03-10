@@ -1,8 +1,7 @@
 
 import { Position } from '@xyflow/react';
 
-export type NoteType = 'chapter' | 'main-topic' | 'sub-topic' | 'text' | 'image' | 'table' | 
-                       'square' | 'circle' | 'triangle' | 'sticky-note' | 'arrow';
+export type NoteType = 'chapter' | 'main-topic' | 'sub-topic';
 
 export type MediaType = 'image' | 'video' | 'youtube';
 
