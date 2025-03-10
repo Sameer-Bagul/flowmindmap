@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Text, Image, Table, Square, Circle, Triangle } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, ListTodo, FileText } from "lucide-react";
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible";
 import type { NoteType } from '../types/node';
 
@@ -12,12 +12,9 @@ interface ShapeType {
 }
 
 const nodeShapes: ShapeType[] = [
-  { type: 'text', icon: Text, label: 'Text Node' },
-  { type: 'image', icon: Image, label: 'Image Node' },
-  { type: 'table', icon: Table, label: 'Table Node' },
-  { type: 'square', icon: Square, label: 'Square Node' },
-  { type: 'circle', icon: Circle, label: 'Circle Node' },
-  { type: 'triangle', icon: Triangle, label: 'Triangle Node' },
+  { type: 'chapter', icon: BookOpen, label: 'Chapter' },
+  { type: 'main-topic', icon: ListTodo, label: 'Main Topic' },
+  { type: 'sub-topic', icon: FileText, label: 'Sub Topic' },
 ];
 
 export const NodeShapesPanel = () => {
