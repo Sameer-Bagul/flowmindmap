@@ -1,4 +1,6 @@
 
+"use client";
+
 import { useState } from "react";
 import { AIProvider } from "@/types/aiProviders";
 import { callAIProvider, parseAIResponse } from "@/utils/aiProviderApi";

@@ -1,3 +1,6 @@
+
+"use client";
+
 import { create } from 'zustand';
 import { Node, Edge } from '@xyflow/react';
 

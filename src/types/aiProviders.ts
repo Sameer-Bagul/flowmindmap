@@ -15,3 +15,11 @@ export interface AIProviderFormState {
   selectedModel: string;
   apiKey: string;
 }
+
+// Add localStorage keys for consistent storage access
+export const AI_PROVIDER_STORAGE_KEYS = {
+  PROVIDER: 'mindmap-ai-provider',
+  SERVER_URL: 'mindmap-server-url',
+  SELECTED_MODEL: 'mindmap-selected-model',
+  API_KEY: 'mindmap-api-key',
+};
