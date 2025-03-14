@@ -1,12 +1,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AIProvider } from "@/types/aiProviders";
 import { callAIProvider, parseAIResponse } from "@/utils/aiProviderApi";
 import { calculatePositionsForMindmap } from "@/utils/layoutUtils";
 import { toast } from "sonner";
-import { AI_PROVIDERS } from "@/constants/aiProviders";
 
 export function useMindmapGenerator(
   onGenerate: (nodes: any[], edges: any[]) => void,
@@ -14,7 +13,7 @@ export function useMindmapGenerator(
 ) {
   const [loading, setLoading] = useState(false);
   
-  const generateMindmap = async (
+  const generateMindmap = useCallback(async (
     topic: string,
     additionalContext: string,
     aiProvider: AIProvider,
@@ -79,8 +78,12 @@ Ensure each node has a meaningful label and content. Create logical connections 
         prompt
       });
       
-      // Parse the response
+      // Parse the response with error handling
       const mindmapData = parseAIResponse(content);
+      
+      if (!mindmapData || !mindmapData.nodes || !mindmapData.edges) {
+        throw new Error("Invalid response format from AI provider");
+      }
       
       // Calculate positions for the nodes
       const positionedNodes = calculatePositionsForMindmap(mindmapData.nodes);
@@ -92,11 +95,11 @@ Ensure each node has a meaningful label and content. Create logical connections 
       
     } catch (error: any) {
       console.error("Error generating mindmap:", error);
-      toast.error(`Failed to generate mindmap: ${error.message}`);
+      toast.error(`Failed to generate mindmap: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [onGenerate, onClose]);
 
   return {
     loading,
