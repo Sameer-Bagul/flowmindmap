@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -25,9 +25,6 @@ import { FlowToolbar } from '@/components/FlowToolbar';
 import { FlowActions } from '@/components/FlowActions';
 import { GenerateMindmapModal } from '@/components/GenerateMindmapModal';
 
-const initialNodes = [];
-const initialEdges = [];
-
 const defaultEdgeOptions = {
   type: 'smoothstep',
   animated: true,
@@ -39,9 +36,21 @@ const defaultEdgeOptions = {
 };
 
 const Index = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setElements } = useFlowStore();
+  const { nodes, edges, setElements, setInitialElements } = useFlowStore();
+  const [flowNodes, setNodes, onNodesChange] = useNodesState(nodes);
+  const [flowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
+
+  // Initialize flow elements when the component mounts
+  useEffect(() => {
+    if (flowNodes.length === 0 && flowEdges.length === 0) {
+      setInitialElements();
+    }
+  }, [flowNodes.length, flowEdges.length, setInitialElements]);
+
+  // Update flow store when nodes or edges change
+  useEffect(() => {
+    setElements(flowNodes, flowEdges);
+  }, [flowNodes, flowEdges, setElements]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -52,12 +61,11 @@ const Index = () => {
       };
       setEdges((eds) => {
         const update = addEdge(newEdge, eds);
-        setElements(nodes, update);
         return update;
       });
       toast.success('Nodes connected successfully');
     },
-    [setEdges, nodes, setElements],
+    [setEdges],
   );
 
   const onEdgeClick = useCallback(
@@ -66,13 +74,12 @@ const Index = () => {
       if (isDelete) {
         setEdges((eds) => {
           const update = eds.filter((e) => e.id !== edge.id);
-          setElements(nodes, update);
           return update;
         });
         toast.success('Connection removed successfully');
       }
     },
-    [setEdges, nodes, setElements]
+    [setEdges]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -95,7 +102,7 @@ const Index = () => {
       };
 
       const newNode = {
-        id: `${type}-${nodes.length + 1}`,
+        id: `${type}-${flowNodes.length + 1}`,
         type,
         position,
         data: { 
@@ -104,18 +111,14 @@ const Index = () => {
         },
       };
 
-      setNodes((nds) => {
-        const update = [...nds, newNode];
-        setElements(update, edges);
-        return update;
-      });
+      setNodes((nds) => [...nds, newNode]);
       toast.success(`Added new ${type.replace('-', ' ')}`);
     },
-    [nodes.length, setNodes, edges, setElements],
+    [flowNodes.length, setNodes],
   );
 
   const handleGeneratedMindmap = (generatedNodes, generatedEdges) => {
-    if (nodes.length > 0 || edges.length > 0) {
+    if (flowNodes.length > 0 || flowEdges.length > 0) {
       if (!window.confirm("This will replace your current mindmap. Continue?")) {
         return;
       }
@@ -123,7 +126,6 @@ const Index = () => {
     
     setNodes(generatedNodes);
     setEdges(generatedEdges);
-    setElements(generatedNodes, generatedEdges);
     toast.success("AI-generated mindmap created successfully!");
   };
 
@@ -131,8 +133,8 @@ const Index = () => {
     <div className="w-screen h-screen flex bg-background">
       <div className="flex-1">
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={flowNodes}
+          edges={flowEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}

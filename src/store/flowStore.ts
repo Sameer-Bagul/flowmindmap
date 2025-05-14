@@ -11,6 +11,7 @@ interface FlowState {
   nodes: Node[];
   edges: Edge[];
   setElements: (nodes: Node[], edges: Edge[]) => void;
+  setInitialElements: () => void;
   undo: () => void;
   redo: () => void;
 }
@@ -20,11 +21,50 @@ const deepCopy = <T extends any>(items: T[]): T[] => {
   return JSON.parse(JSON.stringify(items));
 };
 
-export const useFlowStore = create<FlowState>((set) => ({
+// Storage key for persisting flow state
+const FLOW_STORAGE_KEY = 'flow_state';
+
+// Load saved state from localStorage
+const loadSavedState = (): { nodes: Node[], edges: Edge[] } | null => {
+  try {
+    const savedState = localStorage.getItem(FLOW_STORAGE_KEY);
+    if (savedState) {
+      return JSON.parse(savedState);
+    }
+  } catch (error) {
+    console.error('Error loading flow state from localStorage:', error);
+  }
+  return null;
+};
+
+// Save state to localStorage
+const saveState = (nodes: Node[], edges: Edge[]) => {
+  try {
+    localStorage.setItem(FLOW_STORAGE_KEY, JSON.stringify({ nodes, edges }));
+  } catch (error) {
+    console.error('Error saving flow state to localStorage:', error);
+  }
+};
+
+export const useFlowStore = create<FlowState>((set, get) => ({
   history: [],
   currentIndex: -1,
   nodes: [],
   edges: [],
+  
+  setInitialElements: () => {
+    // Try to load saved state, otherwise use empty arrays
+    const savedState = loadSavedState();
+    const initialNodes = savedState?.nodes || [];
+    const initialEdges = savedState?.edges || [];
+    
+    set({ 
+      nodes: initialNodes,
+      edges: initialEdges,
+      history: initialNodes.length > 0 || initialEdges.length > 0 ? [{ nodes: initialNodes, edges: initialEdges }] : [],
+      currentIndex: initialNodes.length > 0 || initialEdges.length > 0 ? 0 : -1
+    });
+  },
   
   setElements: (nodes, edges) => {
     set(
@@ -48,6 +88,9 @@ export const useFlowStore = create<FlowState>((set) => ({
         
         state.nodes = newNodes;
         state.edges = newEdges;
+        
+        // Save to localStorage
+        saveState(newNodes, newEdges);
       })
     );
   },
@@ -60,6 +103,9 @@ export const useFlowStore = create<FlowState>((set) => ({
           const { nodes, edges } = state.history[state.currentIndex];
           state.nodes = deepCopy(nodes);
           state.edges = deepCopy(edges);
+          
+          // Save to localStorage
+          saveState(state.nodes, state.edges);
         }
       })
     );
@@ -73,6 +119,9 @@ export const useFlowStore = create<FlowState>((set) => ({
           const { nodes, edges } = state.history[state.currentIndex];
           state.nodes = deepCopy(nodes);
           state.edges = deepCopy(edges);
+          
+          // Save to localStorage
+          saveState(state.nodes, state.edges);
         }
       })
     );

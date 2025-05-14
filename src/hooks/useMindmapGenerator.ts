@@ -1,19 +1,16 @@
 
-"use client";
-
-import { useState, useCallback } from "react";
-import { AIProvider } from "@/types/aiProviders";
+import { useState } from 'react';
 import { callAIProvider, parseAIResponse } from "@/utils/aiProviderApi";
-import { calculatePositionsForMindmap } from "@/utils/layoutUtils";
+import { AIProvider } from "@/types/aiProviders";
 import { toast } from "sonner";
 
 export function useMindmapGenerator(
-  onGenerate: (nodes: any[], edges: any[]) => void,
-  onClose: () => void
+  onGenerate: (nodes: any[], edges: any[]) => void, 
+  onComplete?: () => void
 ) {
   const [loading, setLoading] = useState(false);
-  
-  const generateMindmap = useCallback(async (
+
+  const generateMindmap = async (
     topic: string,
     additionalContext: string,
     aiProvider: AIProvider,
@@ -22,53 +19,43 @@ export function useMindmapGenerator(
     apiKey: string
   ) => {
     if (!topic.trim()) {
-      toast.error("Please enter a topic");
+      toast.error("Please enter a topic for your mindmap");
       return;
     }
 
-    if (!serverUrl.trim()) {
-      toast.error("Please enter the server URL");
-      return;
-    }
+    setLoading(true);
+    
+    // Construct the prompt for the AI
+    const contextPart = additionalContext ? 
+      `\n\nAdditional context: ${additionalContext}` : '';
+    
+    const prompt = `Create a detailed mindmap about "${topic}".${contextPart}
+
+    Return ONLY valid JSON with this exact structure:
+    {
+      "nodes": [
+        {
+          "id": "node-1", // unique ID for each node
+          "type": "textNode", // keep this as "textNode" for all nodes
+          "data": {
+            "title": "Main Topic", // short title
+            "content": "Extended description or notes can go here" // optional detailed content
+          },
+          "position": { "x": 0, "y": 0 } // will be adjusted by layout
+        },
+        // more nodes...
+      ],
+      "edges": [
+        {
+          "id": "edge-1-2", // unique ID for each edge
+          "source": "node-1", // ID of source node
+          "target": "node-2" // ID of target node
+        },
+        // more edges...
+      ]
+    }`;
 
     try {
-      setLoading(true);
-      
-      const prompt = `Create a comprehensive and structured mindmap about "${topic}". ${additionalContext ? `Additional context: ${additionalContext}` : ""}
-      
-The response should be valid JSON matching this structure:
-{
-  "nodes": [
-    {
-      "id": "chapter-1", 
-      "type": "chapter", 
-      "data": {"label": "Main Topic", "type": "chapter", "content": "Main topic description"}
-    },
-    {
-      "id": "main-topic-1",
-      "type": "main-topic",
-      "data": {"label": "Subtopic 1", "type": "main-topic", "content": "Description of subtopic 1"}
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge-1-2",
-      "source": "chapter-1",
-      "target": "main-topic-1",
-      "animated": true
-    }
-  ]
-}
-
-IMPORTANT: Do not include position information in the nodes, as the layout will be calculated automatically.
-
-The mindmap should include:
-- 1 chapter node as the main topic
-- 4-6 main-topic nodes for key subtopics
-- 6-12 sub-topic nodes for details
-
-Ensure each node has a meaningful label and content. Create logical connections between nodes that form a coherent knowledge structure.`;
-
       // Call the AI provider
       const content = await callAIProvider({
         aiProvider,
@@ -77,32 +64,25 @@ Ensure each node has a meaningful label and content. Create logical connections 
         apiKey,
         prompt
       });
-      
-      // Parse the response with error handling
+
+      // Parse the response
       const mindmapData = parseAIResponse(content);
+
+      // Pass the generated mindmap data to the callback
+      onGenerate(mindmapData.nodes, mindmapData.edges);
+      toast.success("Mindmap generated successfully");
       
-      if (!mindmapData || !mindmapData.nodes || !mindmapData.edges) {
-        throw new Error("Invalid response format from AI provider");
+      // Call the completion callback if provided
+      if (onComplete) {
+        onComplete();
       }
-      
-      // Calculate positions for the nodes
-      const positionedNodes = calculatePositionsForMindmap(mindmapData.nodes);
-      
-      // Apply the generated mindmap
-      onGenerate(positionedNodes, mindmapData.edges);
-      toast.success("Mindmap generated successfully!");
-      onClose();
-      
     } catch (error: any) {
+      toast.error(`Failed to generate mindmap: ${error.message}`);
       console.error("Error generating mindmap:", error);
-      toast.error(`Failed to generate mindmap: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
-  }, [onGenerate, onClose]);
-
-  return {
-    loading,
-    generateMindmap
   };
+
+  return { loading, generateMindmap };
 }
